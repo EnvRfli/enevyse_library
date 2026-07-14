@@ -1,0 +1,18 @@
+{
+  "welcome": "Welcome to Enevyse Library",
+  "sign_in_subtitle": "Sign in to your account",
+  "login": "Login",
+  "email": "Email",
+  "password": "Password",
+  "remember_me": "Remember Me",
+  "forgot_password": "Forgot Password?",
+  "register_prompt": "Don't have an account?",
+  "register": "Register",
+  "invalid_credentials": "Login failed. Please check your credentials.",
+  "error_occurred": "An error occurred. Please try again later.",
+  "email_required": "Please enter your email",
+  "password_required": "Please enter your password",
+  "home": "Home",
+  "borrow": "Borrow",
+  "profile": "Profile"
+}

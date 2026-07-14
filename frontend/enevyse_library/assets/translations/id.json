@@ -1,0 +1,18 @@
+{
+  "welcome": "Selamat datang di Perpustakaan Enevyse",
+  "sign_in_subtitle": "Masuk ke akun Anda",
+  "login": "Masuk",
+  "email": "Email",
+  "password": "Kata Sandi",
+  "remember_me": "Ingat Saya",
+  "forgot_password": "Lupa Kata Sandi?",
+  "register_prompt": "Belum punya akun?",
+  "register": "Daftar",
+  "invalid_credentials": "Login gagal. Silakan periksa kredensial Anda.",
+  "error_occurred": "Terjadi kesalahan. Silakan coba lagi nanti.",
+  "email_required": "Silakan masukkan email Anda",
+  "password_required": "Silakan masukkan kata sandi Anda",
+  "home": "Beranda",
+  "borrow": "Pinjam",
+  "profile": "Profil"
+}

@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------
+  # 1. PostgreSQL Database
+  # ----------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: library_db
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_DB: library_db
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # ----------------------------------------
+  # 2. RabbitMQ Message Broker
+  # ----------------------------------------
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: library_rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      # Port utama untuk komunikasi antar microservices (AMQP)
+      - "5672:5672"
+      # Port untuk mengakses Dashboard UI RabbitMQ di browser
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+# ----------------------------------------
+# 3. Persistent Volumes
+# ----------------------------------------
+# Berfungsi agar data tidak hilang saat container dimatikan
+volumes:
+  postgres_data:
+  rabbitmq_data:

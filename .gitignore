@@ -1,0 +1,77 @@
+# ----------------------------------------------------------------------
+# Golang (Backend)
+# ----------------------------------------------------------------------
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (New the just, lock are mostly ignored now if using Go 1.16+ with modules, but good to have)
+/vendor/
+/workspace/
+
+# ----------------------------------------------------------------------
+# Flutter / Dart (Frontend)
+# ----------------------------------------------------------------------
+# Hardware-specific workspaces
+.idea/
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/build/
+
+# Exceptions to above rules.
+!**/build/linux/
+!**/build/mac/
+!**/build/windows/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+
+# ----------------------------------------------------------------------
+# OS / Environment / IDE
+# ----------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Environment variables
+# Disarankan untuk tidak memasukkan file .env ke dalam git untuk keamanan.
+# Jika Anda ingin menyimpan .env untuk keperluan tes lokal, Anda bisa menghapus baris di bawah ini:
+.env
