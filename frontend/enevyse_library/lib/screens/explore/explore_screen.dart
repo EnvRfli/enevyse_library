@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import '../../models/mock_book.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/search_bar_widget.dart';
 import '../../widgets/category_chip.dart';
+import '../main_layout/logic/main_layout_logic.dart';
 import 'widgets/book_list_tile.dart';
 
 class ExploreScreen extends StatelessWidget {
@@ -12,6 +14,9 @@ class ExploreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check if we need to auto-focus the search bar (navigated from Home)
+    final autoFocusSearch = Provider.of<MainLayoutLogic>(context, listen: false).consumeSearchFocus();
+
     // Combine all books for the explore list
     final allBooks = [...mockTrendingBooks, ...mockRecommendedBooks, ...mockNewArrivals];
     
@@ -36,7 +41,7 @@ class ExploreScreen extends StatelessWidget {
             SizedBox(height: 20.h),
             
             // Search Bar
-            const SearchBarWidget(),
+            SearchBarWidget(autoFocus: autoFocusSearch),
             SizedBox(height: 20.h),
             
             // Filter and Sort Bar

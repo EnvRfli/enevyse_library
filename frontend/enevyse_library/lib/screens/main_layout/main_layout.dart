@@ -7,6 +7,7 @@ import '../../../theme/app_colors.dart';
 import 'logic/main_layout_logic.dart';
 import '../home/home_screen.dart';
 import '../explore/explore_screen.dart';
+import '../history/history_screen.dart';
 
 class MainLayout extends StatelessWidget {
   const MainLayout({super.key});
@@ -31,7 +32,7 @@ class _MainLayoutView extends StatelessWidget {
     final screens = [
       const HomeScreen(),
       const ExploreScreen(),
-      const Scaffold(body: Center(child: Text('History'))), // Placeholder
+      const HistoryScreen(),
       const Scaffold(body: Center(child: Text('Profile'))), // Placeholder
     ];
 

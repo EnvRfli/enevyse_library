@@ -31,8 +31,8 @@ class HomeScreen extends StatelessWidget {
               SearchBarWidget(
                 readOnly: true,
                 onTap: () {
-                  // Switch to Explore tab (index 1)
-                  Provider.of<MainLayoutLogic>(context, listen: false).setIndex(1);
+                  // Switch to Explore tab and focus search
+                  Provider.of<MainLayoutLogic>(context, listen: false).triggerSearchFocus();
                 },
               ),
               SizedBox(height: 24.h),

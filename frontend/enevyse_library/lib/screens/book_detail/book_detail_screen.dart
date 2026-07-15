@@ -174,7 +174,9 @@ class BookDetailScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 56.h,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.push('/borrow/${book.id}');
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF8B9CEB), // Soft Indigo
                       foregroundColor: Colors.white,

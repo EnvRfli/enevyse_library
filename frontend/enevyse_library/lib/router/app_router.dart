@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/main_layout/main_layout.dart';
 import '../screens/book_detail/book_detail_screen.dart';
+import '../screens/borrow/borrow_form_screen.dart';
+import '../screens/borrow/borrow_success_screen.dart';
+import '../screens/borrow_detail/borrow_detail_screen.dart';
 
 class AppRouter {
   static final GlobalKey<NavigatorState> rootNavigatorKey =
@@ -26,6 +29,31 @@ class AppRouter {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return BookDetailScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/borrow/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return BorrowFormScreen(bookId: id);
+        },
+      ),
+      GoRoute(
+        path: '/borrow-success',
+        builder: (context, state) {
+          final extras = state.extra as Map<String, dynamic>;
+          return BorrowSuccessScreen(
+            transactionId: extras['transactionId'] as String,
+            bookTitle: extras['bookTitle'] as String,
+            deadline: extras['deadline'] as DateTime,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/borrow-detail/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return BorrowDetailScreen(transactionId: id);
         },
       ),
     ],
