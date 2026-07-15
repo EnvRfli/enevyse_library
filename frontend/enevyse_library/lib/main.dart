@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'router/app_router.dart';
 import 'providers/auth_provider.dart';
+import 'providers/book_provider.dart';
+import 'repository/book_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +31,11 @@ class EnevyseLibraryApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()..checkAuth()),
+        Provider<BookRepository>(create: (_) => BookRepository()),
+        ChangeNotifierProxyProvider<BookRepository, BookProvider>(
+          create: (context) => BookProvider(context.read<BookRepository>()),
+          update: (context, repository, previous) => previous ?? BookProvider(repository),
+        ),
       ],
       child: ScreenUtilInit(
         designSize: const Size(390, 844),

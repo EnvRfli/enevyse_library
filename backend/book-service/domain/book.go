@@ -16,11 +16,12 @@ type Book struct {
 	Published       time.Time      `json:"published"`
 	Ratings         float64        `gorm:"default:0" json:"ratings"`
 	CoverURL        string         `json:"cover_url"`
-	Category        string         `json:"category"`
-	Genre           string         `json:"genre"`
-	Languages       pq.StringArray `gorm:"type:text[]" json:"languages"`
+	Category        pq.StringArray `gorm:"type:text[]" json:"categories"`
+	Genre           pq.StringArray `gorm:"type:text[]" json:"genres"`
+	Language        string         `json:"language"`
 	TotalCopies     int            `gorm:"not null;default:1" json:"total_copies"`
 	AvailableCopies int            `gorm:"not null;default:1" json:"available_copies"`
+	TotalPages      int            `gorm:"default:0" json:"total_pages"`
 	Synopsis        string         `gorm:"type:text" json:"synopsis"`
 	CreatedAt       time.Time      `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
@@ -35,7 +36,7 @@ type FavoriteBook struct {
 // BookFilter defines the filter parameters for searching books.
 type BookFilter struct {
 	Title     string
-	Category  string
+	Category  string // We keep it string because frontend passes a single category to filter, or we can make it []string. But for backward compatibility with `GetAllBooks` we leave it as string to search within the array.
 	MinRating float64
 	Language  string
 }
@@ -47,6 +48,10 @@ type BookRepository interface {
 	UpdateAvailableCopies(id uuid.UUID, delta int) error
 	ToggleFavorite(userID uint, bookID uuid.UUID) (bool, error)
 	FindFavoritesByUserID(userID uint) ([]Book, error)
+	Create(book *Book) error
+	Update(book *Book) error
+	Delete(id uuid.UUID) error
+	UpdateCover(id uuid.UUID, coverURL string) error
 }
 
 // BookUsecase defines the contract for book business logic.
@@ -55,4 +60,8 @@ type BookUsecase interface {
 	GetBookByID(id uuid.UUID) (*Book, error)
 	ToggleFavorite(userID uint, bookID uuid.UUID) (bool, error)
 	GetUserFavorites(userID uint) ([]Book, error)
+	CreateBook(book *Book) error
+	UpdateBook(id uuid.UUID, book *Book) error
+	DeleteBook(id uuid.UUID) error
+	UploadCoverImage(id uuid.UUID, fileData []byte, fileName string, contentType string) (string, error)
 }

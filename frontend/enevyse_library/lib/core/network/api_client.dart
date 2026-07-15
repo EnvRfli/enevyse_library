@@ -10,7 +10,7 @@ enum Microservice {
 
 class ApiClient {
   static const String _localhost =
-      'http://192.168.1.9'; // Diubah untuk Emulator Mumu Player
+      'http://10.133.250.7'; // Diubah untuk Emulator Mumu Player
 
   static const String identityBaseUrl = '$_localhost:3001';
   static const String bookBaseUrl = '$_localhost:8002';
@@ -87,5 +87,29 @@ class ApiClient {
     final headers = await _getHeaders(requiresAuth: requiresAuth);
 
     return await http.delete(url, headers: headers);
+  }
+
+  Future<http.StreamedResponse> postMultipart(
+      Microservice service, String endpoint,
+      {required String fileField,
+      required String filePath,
+      Map<String, String>? fields,
+      bool requiresAuth = true}) async {
+    final baseUrl = _getBaseUrl(service);
+    final url = Uri.parse('$baseUrl$endpoint');
+    final request = http.MultipartRequest('POST', url);
+
+    final headers = await _getHeaders(requiresAuth: requiresAuth);
+    headers
+        .remove('Content-Type'); // MultipartRequest sets its own Content-Type
+    request.headers.addAll(headers);
+
+    if (fields != null) {
+      request.fields.addAll(fields);
+    }
+
+    request.files.add(await http.MultipartFile.fromPath(fileField, filePath));
+
+    return await request.send();
   }
 }

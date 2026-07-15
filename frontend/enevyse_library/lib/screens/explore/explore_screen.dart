@@ -2,24 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
-import '../../models/mock_book.dart';
+import '../../providers/book_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/search_bar_widget.dart';
 import '../../widgets/category_chip.dart';
 import '../main_layout/logic/main_layout_logic.dart';
 import 'widgets/book_list_tile.dart';
+import 'function/build_outlined_button.dart';
 
-class ExploreScreen extends StatelessWidget {
+class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
+
+  @override
+  State<ExploreScreen> createState() => _ExploreScreenState();
+}
+
+class _ExploreScreenState extends State<ExploreScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch books on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BookProvider>().fetchBooks();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     // Check if we need to auto-focus the search bar (navigated from Home)
-    final autoFocusSearch = Provider.of<MainLayoutLogic>(context, listen: false).consumeSearchFocus();
+    final autoFocusSearch = Provider.of<MainLayoutLogic>(context, listen: false)
+        .consumeSearchFocus();
 
-    // Combine all books for the explore list
-    final allBooks = [...mockTrendingBooks, ...mockRecommendedBooks, ...mockNewArrivals];
-    
+    final provider = context.watch<BookProvider>();
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -39,19 +54,22 @@ class ExploreScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20.h),
-            
+
             // Search Bar
-            SearchBarWidget(autoFocus: autoFocusSearch),
+            SearchBarWidget(
+              autoFocus: autoFocusSearch,
+              onChanged: provider.onSearchChanged,
+            ),
             SizedBox(height: 20.h),
-            
+
             // Filter and Sort Bar
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
                 children: [
-                  _buildOutlinedButton(Icons.filter_list_rounded, 'filter'.tr()),
+                  buildOutlinedButton(Icons.filter_list_rounded, 'filter'.tr()),
                   SizedBox(width: 12.w),
-                  _buildOutlinedButton(Icons.sort_rounded, 'sort'.tr()),
+                  buildOutlinedButton(Icons.sort_rounded, 'sort'.tr()),
                   const Spacer(),
                   Container(
                     padding: EdgeInsets.all(8.w),
@@ -69,7 +87,7 @@ class ExploreScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 24.h),
-            
+
             // Categories
             SizedBox(
               height: 40.h,
@@ -77,54 +95,48 @@ class ExploreScreen extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
-                children: [
-                  CategoryChip(label: 'all'.tr(), backgroundColor: Colors.transparent, textColor: Colors.white, isSelected: true),
-                  CategoryChip(label: 'cat_novel'.tr(), backgroundColor: const Color(0xFFF1E6FA), textColor: const Color(0xFF9E86E1)),
-                  CategoryChip(label: 'cat_technology'.tr(), backgroundColor: const Color(0xFFE0F4FA), textColor: const Color(0xFF63B8D9)),
-                  CategoryChip(label: 'cat_history'.tr(), backgroundColor: const Color(0xFFE8F9EE), textColor: const Color(0xFF75D9A5)),
-                  CategoryChip(label: 'cat_business'.tr(), backgroundColor: const Color(0xFFFDF0E5), textColor: const Color(0xFFD67D55)),
-                ],
+                children: provider.categories.map((category) {
+                  // Assuming translation keys match 'cat_category', except 'all'
+                  String label = category.toLowerCase();
+                  if (label != 'all') label = 'cat_$label';
+                  return CategoryChip(
+                    label: label.tr(),
+                    backgroundColor: provider.selectedCategory == category
+                        ? AppColors.primary
+                        : const Color(0xFFF2F2F5),
+                    textColor: provider.selectedCategory == category
+                        ? Colors.white
+                        : AppColors.textPrimary,
+                    isSelected: provider.selectedCategory == category,
+                    onTap: () => provider.onCategorySelected(category),
+                  );
+                }).toList(),
               ),
             ),
             SizedBox(height: 24.h),
-            
+
             // Book List
             Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                physics: const BouncingScrollPhysics(),
-                itemCount: allBooks.length,
-                itemBuilder: (context, index) {
-                  return BookListTile(book: allBooks[index]);
-                },
-              ),
+              child: provider.isLoadingBooks
+                  ? const Center(child: CircularProgressIndicator())
+                  : provider.booksErrorMessage != null
+                      ? Center(
+                          child: Text(provider.booksErrorMessage!,
+                              style: const TextStyle(color: Colors.red)))
+                      : provider.books.isEmpty
+                          ? const Center(child: Text('No books found'))
+                          : ListView.builder(
+                              padding: EdgeInsets.symmetric(horizontal: 24.w),
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: provider.books.length,
+                              itemBuilder: (context, index) {
+                                return BookListTile(
+                                    book: provider.books[index]);
+                              },
+                            ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildOutlinedButton(IconData icon, String label) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 16.w, color: AppColors.textPrimary),
-          SizedBox(width: 8.w),
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 12.sp,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
       ),
     );
   }

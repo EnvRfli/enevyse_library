@@ -3,7 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../../../theme/app_colors.dart';
+import '../../../providers/auth_provider.dart';
 import 'logic/main_layout_logic.dart';
 import '../home/home_screen.dart';
 import '../explore/explore_screen.dart';
@@ -36,11 +39,34 @@ class _MainLayoutView extends StatelessWidget {
       const Scaffold(body: Center(child: Text('Profile'))), // Placeholder
     ];
 
+    final authProvider = Provider.of<AuthProvider>(context);
+    final isAdmin = authProvider.currentUser?.role == 'admin';
+
     return Scaffold(
       body: IndexedStack(
         index: logic.currentIndex,
         children: screens,
       ),
+      floatingActionButton: logic.currentIndex == 3 && isAdmin
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  heroTag: 'edit-book',
+                  onPressed: () => context.push('/admin/edit-book'),
+                  backgroundColor: AppColors.accentMocca,
+                  child: const Icon(Icons.edit, color: Colors.white),
+                ),
+                const SizedBox(height: 16),
+                FloatingActionButton(
+                  heroTag: 'add-book',
+                  onPressed: () => context.push('/admin/add-book'),
+                  backgroundColor: AppColors.primary,
+                  child: const Icon(Icons.add, color: Colors.white),
+                ),
+              ],
+            )
+          : null,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: logic.currentIndex,
         onTap: logic.setIndex,
@@ -49,8 +75,10 @@ class _MainLayoutView extends StatelessWidget {
         unselectedItemColor: Colors.grey.shade400,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.normal),
+        selectedLabelStyle:
+            TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600),
+        unselectedLabelStyle:
+            TextStyle(fontSize: 12.sp, fontWeight: FontWeight.normal),
         items: [
           BottomNavigationBarItem(
             icon: const Icon(Icons.home_outlined),

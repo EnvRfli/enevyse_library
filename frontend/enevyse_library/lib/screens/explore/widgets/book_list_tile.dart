@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import '../../../models/mock_book.dart';
 import '../../../theme/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../../models/book.dart';
 
 class BookListTile extends StatelessWidget {
-  final MockBook book;
+  final Book book;
 
   const BookListTile({super.key, required this.book});
 
@@ -34,14 +34,24 @@ class BookListTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Cover Image Placeholder
+            // Cover Image
             Container(
               width: 80.w,
               height: 110.h,
               decoration: BoxDecoration(
-                color: book.placeholderColor,
+                color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(12.r),
               ),
+              child: book.coverUrl != null && book.coverUrl!.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12.r),
+                      child: Image.network(
+                        book.coverUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(Icons.book, color: Colors.grey),
+                      ),
+                    )
+                  : const Icon(Icons.book, color: Colors.grey),
             ),
             SizedBox(width: 16.w),
             
@@ -74,7 +84,7 @@ class BookListTile extends StatelessWidget {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    '${book.author} · ${book.genre}',
+                    '${book.author} · ${book.categories.isNotEmpty ? book.categories.first : ''}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -91,7 +101,7 @@ class BookListTile extends StatelessWidget {
                       Icon(Icons.star_half, color: Colors.amber, size: 14.w),
                       SizedBox(width: 4.w),
                       Text(
-                        book.rating.toString(),
+                        book.ratings.toString(),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
@@ -100,7 +110,7 @@ class BookListTile extends StatelessWidget {
                   ),
                   SizedBox(height: 8.h),
                   Text(
-                    '${book.availableCount} ${'copies_available'.tr()}',
+                    '${book.availableCopies} ${'copies_available'.tr()}',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: AppColors.textSecondary,
                         ),

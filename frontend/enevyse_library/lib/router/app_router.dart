@@ -5,6 +5,8 @@ import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/main_layout/main_layout.dart';
 import '../screens/book_detail/book_detail_screen.dart';
+import '../screens/admin/add_book_screen.dart';
+import '../screens/admin/edit_book_screen.dart';
 import '../screens/borrow/borrow_form_screen.dart';
 import '../screens/borrow/borrow_success_screen.dart';
 import '../screens/borrow_detail/borrow_detail_screen.dart';
@@ -60,6 +62,14 @@ class AppRouter {
           final id = state.pathParameters['id']!;
           return BorrowDetailScreen(transactionId: id);
         },
+      ),
+      GoRoute(
+        path: '/admin/add-book',
+        builder: (context, state) => const AddBookScreen(),
+      ),
+      GoRoute(
+        path: '/admin/edit-book',
+        builder: (context, state) => const EditBookScreen(),
       ),
     ],
   );

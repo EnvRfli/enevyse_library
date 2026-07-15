@@ -7,12 +7,14 @@ class SearchBarWidget extends StatelessWidget {
   final bool readOnly;
   final VoidCallback? onTap;
   final bool autoFocus;
+  final ValueChanged<String>? onChanged;
 
   const SearchBarWidget({
     super.key,
     this.readOnly = false,
     this.onTap,
     this.autoFocus = false,
+    this.onChanged,
   });
 
   @override
@@ -29,6 +31,7 @@ class SearchBarWidget extends StatelessWidget {
           readOnly: readOnly,
           onTap: onTap,
           autofocus: autoFocus,
+          onChanged: onChanged,
           decoration: InputDecoration(
             hintText: 'search_books'.tr(),
             hintStyle: TextStyle(

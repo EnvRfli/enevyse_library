@@ -1,6 +1,7 @@
 package http
 
 import (
+	"io"
 	"strconv"
 	"book-service/domain"
 	"book-service/middleware"
@@ -28,6 +29,13 @@ func NewBookHandler(app *fiber.App, uc domain.BookUsecase) {
 	
 	books.Get("/:id", handler.GetBookByID)
 	books.Post("/:id/favorite", middleware.RequireAuth, handler.ToggleFavorite)
+
+	// Admin routes
+	adminBooks := books.Group("/", middleware.RequireAuth, middleware.RequireAdmin)
+	adminBooks.Post("/", handler.CreateBook)
+	adminBooks.Put("/:id", handler.UpdateBook)
+	adminBooks.Delete("/:id", handler.DeleteBook)
+	adminBooks.Post("/:id/cover", handler.UploadCover)
 }
 
 func (h *BookHandler) GetAllBooks(c *fiber.Ctx) error {
@@ -133,4 +141,100 @@ func (h *BookHandler) GetUserFavorites(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(books)
+}
+
+func (h *BookHandler) CreateBook(c *fiber.Ctx) error {
+	var book domain.Book
+	if err := c.BodyParser(&book); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body", "details": err.Error()})
+	}
+
+	if err := h.bookUsecase.CreateBook(&book); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create book"})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(book)
+}
+
+func (h *BookHandler) UpdateBook(c *fiber.Ctx) error {
+	idParam := c.Params("id")
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid UUID format"})
+	}
+
+	var book domain.Book
+	if err := c.BodyParser(&book); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+	}
+
+	if err := h.bookUsecase.UpdateBook(id, &book); err != nil {
+		if err.Error() == "book not found" {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Book not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update book"})
+	}
+
+	// Fetch updated book to return
+	updatedBook, _ := h.bookUsecase.GetBookByID(id)
+	return c.Status(fiber.StatusOK).JSON(updatedBook)
+}
+
+func (h *BookHandler) DeleteBook(c *fiber.Ctx) error {
+	idParam := c.Params("id")
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid UUID format"})
+	}
+
+	if err := h.bookUsecase.DeleteBook(id); err != nil {
+		if err.Error() == "book not found" {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Book not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete book"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Book deleted successfully"})
+}
+
+func (h *BookHandler) UploadCover(c *fiber.Ctx) error {
+	idParam := c.Params("id")
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid UUID format"})
+	}
+
+	fileHeader, err := c.FormFile("cover_image")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "cover_image is required"})
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to open file"})
+	}
+	defer file.Close()
+
+	fileData, err := io.ReadAll(file)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to read file"})
+	}
+
+	contentType := fileHeader.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+
+	coverURL, err := h.bookUsecase.UploadCoverImage(id, fileData, fileHeader.Filename, contentType)
+	if err != nil {
+		if err.Error() == "book not found" {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Book not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message":   "Cover image uploaded successfully",
+		"cover_url": coverURL,
+	})
 }

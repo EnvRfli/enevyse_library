@@ -24,14 +24,14 @@ func (r *bookRepository) FindAll(filter domain.BookFilter) ([]domain.Book, error
 		query = query.Where("title ILIKE ?", "%"+filter.Title+"%")
 	}
 	if filter.Category != "" {
-		query = query.Where("category ILIKE ?", filter.Category)
+		// using array contains operator for PostgreSQL since category is now an array
+		query = query.Where("? = ANY(category)", filter.Category)
 	}
 	if filter.MinRating > 0 {
 		query = query.Where("ratings >= ?", filter.MinRating)
 	}
 	if filter.Language != "" {
-		// using array contains operator for PostgreSQL
-		query = query.Where("? = ANY(languages)", filter.Language)
+		query = query.Where("language ILIKE ?", filter.Language)
 	}
 
 	result := query.Find(&books)
@@ -90,4 +90,34 @@ func (r *bookRepository) FindFavoritesByUserID(userID uint) ([]domain.Book, erro
 		return nil, err
 	}
 	return books, nil
+}
+
+func (r *bookRepository) Create(book *domain.Book) error {
+	return r.db.Create(book).Error
+}
+
+func (r *bookRepository) Update(book *domain.Book) error {
+	return r.db.Save(book).Error
+}
+
+func (r *bookRepository) Delete(id uuid.UUID) error {
+	result := r.db.Delete(&domain.Book{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("book not found")
+	}
+	return nil
+}
+
+func (r *bookRepository) UpdateCover(id uuid.UUID, coverURL string) error {
+	result := r.db.Model(&domain.Book{}).Where("id = ?", id).Update("cover_url", coverURL)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("book not found")
+	}
+	return nil
 }
