@@ -34,6 +34,18 @@ func (r *bookRepository) FindAll(filter domain.BookFilter) ([]domain.Book, error
 		query = query.Where("language ILIKE ?", filter.Language)
 	}
 
+	if filter.SortBy == "available_copies_asc" {
+		query = query.Order("available_copies ASC")
+	} else if filter.SortBy == "created_at_desc" {
+		query = query.Order("created_at DESC")
+	} else if filter.SortBy == "rating_desc" {
+		query = query.Order("ratings DESC")
+	} else if filter.SortBy == "title_asc" {
+		query = query.Order("title ASC")
+	} else if filter.SortBy == "title_desc" {
+		query = query.Order("title DESC")
+	}
+
 	result := query.Find(&books)
 	if result.Error != nil {
 		return nil, result.Error

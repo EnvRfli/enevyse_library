@@ -39,6 +39,7 @@ type BookFilter struct {
 	Category  string // We keep it string because frontend passes a single category to filter, or we can make it []string. But for backward compatibility with `GetAllBooks` we leave it as string to search within the array.
 	MinRating float64
 	Language  string
+	SortBy    string
 }
 
 // BookRepository defines the contract for book database operations.

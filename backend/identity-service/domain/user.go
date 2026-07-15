@@ -1,6 +1,10 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"github.com/lib/pq"
+)
 
 // Konstanta Role untuk menghindari magic string di seluruh codebase.
 const (
@@ -18,10 +22,11 @@ type User struct {
 	Role              string    `gorm:"not null;default:user" json:"role"`
 	Phone             string    `json:"phone"`
 	Address           string    `json:"address"`
-	ProfilePictureURL string    `json:"profile_picture_url"`
-	MembershipStatus  string    `gorm:"not null;default:ACTIVE" json:"membership_status"` // ACTIVE, SUSPENDED
-	CreatedAt         time.Time `json:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at"`
+	ProfilePictureURL   string         `json:"profile_picture_url"`
+	PreferredCategories pq.StringArray `gorm:"type:text[]" json:"preferred_categories"`
+	MembershipStatus    string         `gorm:"not null;default:ACTIVE" json:"membership_status"` // ACTIVE, SUSPENDED
+	CreatedAt           time.Time      `json:"created_at"`
+	UpdatedAt           time.Time      `json:"updated_at"`
 }
 
 // RegisterRequest adalah struct untuk payload registrasi pengguna.
@@ -43,11 +48,11 @@ type AuthResponse struct {
 	User  User   `json:"user"`
 }
 
-// UpdateProfileRequest is the payload for updating personal information
 type UpdateProfileRequest struct {
-	Phone             string `json:"phone"`
-	Address           string `json:"address"`
-	ProfilePictureURL string `json:"profile_picture_url"`
+	Phone               string   `json:"phone"`
+	Address             string   `json:"address"`
+	ProfilePictureURL   string   `json:"profile_picture_url"`
+	PreferredCategories []string `json:"preferred_categories"`
 }
 
 // UpdateMembershipRequest is the payload for an admin to update a user's status

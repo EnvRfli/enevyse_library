@@ -8,7 +8,10 @@ import '../../widgets/search_bar_widget.dart';
 import '../../widgets/category_chip.dart';
 import '../main_layout/logic/main_layout_logic.dart';
 import 'widgets/book_list_tile.dart';
+import '../home/widgets/book_card.dart'; // Import BookCard for grid view
 import 'function/build_outlined_button.dart';
+import 'widgets/filter_bottom_sheet.dart';
+import 'widgets/sort_bottom_sheet.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -18,6 +21,8 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
+  bool _isGridView = false;
+
   @override
   void initState() {
     super.initState();
@@ -67,20 +72,61 @@ class _ExploreScreenState extends State<ExploreScreen> {
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
                 children: [
-                  buildOutlinedButton(Icons.filter_list_rounded, 'filter'.tr()),
+                  buildOutlinedButton(
+                    Icons.filter_list_rounded,
+                    'filter'.tr(),
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => FilterBottomSheet(
+                          initialRating: provider.selectedMinRating,
+                          onApply: (rating) {
+                            provider.onMinRatingSelected(rating);
+                          },
+                        ),
+                      );
+                    },
+                  ),
                   SizedBox(width: 12.w),
-                  buildOutlinedButton(Icons.sort_rounded, 'sort'.tr()),
+                  buildOutlinedButton(
+                    Icons.sort_rounded,
+                    'sort'.tr(),
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => SortBottomSheet(
+                          initialSortBy: provider.selectedSortBy,
+                          onApply: (sortBy) {
+                            provider.onSortBySelected(sortBy);
+                          },
+                        ),
+                      );
+                    },
+                  ),
                   const Spacer(),
-                  Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF2F2F5),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.grid_view_rounded,
-                      color: AppColors.textPrimary,
-                      size: 20.w,
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isGridView = !_isGridView;
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF2F2F5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _isGridView
+                            ? Icons.view_list_rounded
+                            : Icons.grid_view_rounded,
+                        color: AppColors.textPrimary,
+                        size: 20.w,
+                      ),
                     ),
                   ),
                 ],
@@ -125,15 +171,36 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               style: const TextStyle(color: Colors.red)))
                       : provider.books.isEmpty
                           ? const Center(child: Text('No books found'))
-                          : ListView.builder(
-                              padding: EdgeInsets.symmetric(horizontal: 24.w),
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: provider.books.length,
-                              itemBuilder: (context, index) {
-                                return BookListTile(
-                                    book: provider.books[index]);
-                              },
-                            ),
+                          : _isGridView
+                              ? GridView.builder(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 24.w),
+                                  physics: const BouncingScrollPhysics(),
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    mainAxisSpacing: 16.h,
+                                    crossAxisSpacing: 16.w,
+                                    childAspectRatio: 0.52,
+                                  ),
+                                  itemCount: provider.books.length,
+                                  itemBuilder: (context, index) {
+                                    // Use BookCard for grid view
+                                    return BookCard(
+                                        book: provider.books[index],
+                                        isGrid: true);
+                                  },
+                                )
+                              : ListView.builder(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 24.w),
+                                  physics: const BouncingScrollPhysics(),
+                                  itemCount: provider.books.length,
+                                  itemBuilder: (context, index) {
+                                    return BookListTile(
+                                        book: provider.books[index]);
+                                  },
+                                ),
             ),
           ],
         ),

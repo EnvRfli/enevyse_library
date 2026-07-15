@@ -100,9 +100,19 @@ func (u *userUsecase) UpdateProfile(userID uint, req *domain.UpdateProfileReques
 		return nil, errors.New("user not found")
 	}
 
-	user.Phone = req.Phone
-	user.Address = req.Address
-	user.ProfilePictureURL = req.ProfilePictureURL
+	if req.Phone != "" {
+		user.Phone = req.Phone
+	}
+	if req.Address != "" {
+		user.Address = req.Address
+	}
+	if req.ProfilePictureURL != "" {
+		user.ProfilePictureURL = req.ProfilePictureURL
+	}
+	if len(req.PreferredCategories) > 0 {
+		user.PreferredCategories = req.PreferredCategories
+	}
+
 	user.UpdatedAt = time.Now()
 
 	if err := u.userRepo.Update(user); err != nil {

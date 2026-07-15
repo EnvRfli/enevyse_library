@@ -1,54 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../models/mock_book.dart';
+import 'package:go_router/go_router.dart';
+import '../../../models/book.dart';
 import '../../../theme/app_colors.dart';
+import '../../book_detail/function/build_fallback_cover.dart';
 
 class BookCard extends StatelessWidget {
-  final MockBook book;
+  final Book book;
+  final bool isGrid;
 
-  const BookCard({super.key, required this.book});
+  const BookCard({super.key, required this.book, this.isGrid = false});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 140.w, // Fixed width for horizontal scrolling
-      margin: EdgeInsets.only(right: 16.w),
+    return GestureDetector(
+      onTap: () {
+        context.push('/book/${book.id}');
+      },
+      child: Container(
+      width: isGrid ? null : 140.w, // Fixed width for horizontal scrolling
+      margin: isGrid ? EdgeInsets.zero : EdgeInsets.only(right: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Book Cover Placeholder
-          Container(
-            height: 190.h,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: book.placeholderColor,
-              borderRadius: BorderRadius.circular(16.r),
-              boxShadow: [
-                BoxShadow(
-                  color: book.placeholderColor.withValues(alpha: 0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Align(
-              alignment: Alignment.bottomLeft,
-              child: Padding(
-                padding: EdgeInsets.all(12.w),
-                child: Text(
-                  book.title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.sp,
+            Container(
+              height: 190.h,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16.r),
+                child: book.coverUrl != null && book.coverUrl!.isNotEmpty
+                    ? Image.network(
+                        book.coverUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => buildFallbackCover(book.title),
+                      )
+                    : buildFallbackCover(book.title),
               ),
             ),
-          ),
           SizedBox(height: 12.h),
 
           // Title
@@ -84,7 +85,7 @@ class BookCard extends StatelessWidget {
               Icon(Icons.star_half, color: Colors.amber, size: 14.w),
               SizedBox(width: 4.w),
               Text(
-                book.rating.toString(),
+                book.ratings.toStringAsFixed(1),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -97,26 +98,25 @@ class BookCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: book.availableCount > 0
-                  ? const Color(0xFFE8F6EF) // Light green
-                  : const Color(0xFFFFF0E6), // Light orange
+              color: book.availableCopies > 0
+                  ? const Color(0xFF32B37A).withValues(alpha: 0.1) // Green
+                  : const Color(0xFFF28C50).withValues(alpha: 0.1), // Orange
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Text(
-              book.availableCount > 2
-                  ? 'available'.tr()
-                  : (book.availableCount > 0 ? '${book.availableCount} ${'left'.tr()}' : 'unavailable'.tr()),
+              book.availableCopies > 0 ? 'available'.tr() : 'borrowed'.tr(),
               style: TextStyle(
-                color: book.availableCount > 0
-                    ? const Color(0xFF32B37A) // Green text
-                    : const Color(0xFFF28C50), // Orange text
+                color: book.availableCopies > 0
+                    ? const Color(0xFF32B37A)
+                    : const Color(0xFFF28C50),
                 fontSize: 10.sp,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
         ],
       ),
+    ),
     );
   }
 }

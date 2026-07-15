@@ -40,13 +40,14 @@ class BookRepository {
     }
   }
 
-  Future<List<Book>?> getAllBooks({String? title, String? category, String? language, double? minRating}) async {
+  Future<List<Book>?> getAllBooks({String? title, String? category, String? language, double? minRating, String? sortBy}) async {
     try {
       final queryParams = <String, String>{};
       if (title != null && title.isNotEmpty) queryParams['title'] = title;
       if (category != null && category.isNotEmpty && category != 'All') queryParams['category'] = category;
       if (language != null && language.isNotEmpty) queryParams['language'] = language;
       if (minRating != null) queryParams['min_rating'] = minRating.toString();
+      if (sortBy != null && sortBy.isNotEmpty) queryParams['sort_by'] = sortBy;
 
       final uri = Uri(path: '/api/v1/books', queryParameters: queryParams.isNotEmpty ? queryParams : null);
       

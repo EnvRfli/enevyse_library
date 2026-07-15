@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/mock_book.dart';
+import '../../providers/book_provider.dart';
 import '../../theme/app_colors.dart';
 import 'logic/borrow_logic.dart';
 
@@ -30,12 +30,15 @@ class _BorrowFormView extends StatelessWidget {
   Widget build(BuildContext context) {
     final logic = Provider.of<BorrowLogic>(context);
 
-    // Mock book data for display
-    final allBooks = [...mockTrendingBooks, ...mockRecommendedBooks, ...mockNewArrivals];
-    final book = allBooks.firstWhere(
-      (b) => b.id == bookId,
-      orElse: () => allBooks.first,
-    );
+    final provider = context.watch<BookProvider>();
+    final book = provider.selectedBook;
+
+    if (book == null || book.id != bookId) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: Text("Book not found")),
+      );
+    }
 
     // Format dates
     final now = DateTime.now();
@@ -55,7 +58,8 @@ class _BorrowFormView extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.border),
             ),
-            child: Icon(Icons.arrow_back_ios_new_rounded, size: 16.w, color: AppColors.textPrimary),
+            child: Icon(Icons.arrow_back_ios_new_rounded,
+                size: 16.w, color: AppColors.textPrimary),
           ),
           onPressed: () => context.pop(),
         ),
@@ -96,8 +100,15 @@ class _BorrowFormView extends StatelessWidget {
                       width: 60.w,
                       height: 85.h,
                       decoration: BoxDecoration(
-                        color: book.placeholderColor,
+                        color: Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(12.r),
+                        image:
+                            book.coverUrl != null && book.coverUrl!.isNotEmpty
+                                ? DecorationImage(
+                                    image: NetworkImage(book.coverUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
                       ),
                     ),
                     SizedBox(width: 16.w),
@@ -123,13 +134,14 @@ class _BorrowFormView extends StatelessWidget {
                           ),
                           SizedBox(height: 8.h),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10.w, vertical: 4.h),
                             decoration: BoxDecoration(
                               color: const Color(0xFFE8F9EE),
                               borderRadius: BorderRadius.circular(12.r),
                             ),
                             child: Text(
-                              '${book.availableCount} ${'available'.tr()}',
+                              '${book.availableCopies} ${'available'.tr()}',
                               style: TextStyle(
                                 color: const Color(0xFF32B37A),
                                 fontWeight: FontWeight.bold,
@@ -147,7 +159,8 @@ class _BorrowFormView extends StatelessWidget {
 
               // Borrow Date
               _buildLabel('borrow_date'.tr()),
-              _buildReadOnlyField(dateFormat.format(now), icon: Icons.calendar_today_rounded),
+              _buildReadOnlyField(dateFormat.format(now),
+                  icon: Icons.calendar_today_rounded),
               SizedBox(height: 20.h),
 
               // Return Date
@@ -168,7 +181,8 @@ class _BorrowFormView extends StatelessWidget {
                   onChanged: logic.setPurpose,
                   decoration: InputDecoration(
                     hintText: 'purpose_hint'.tr(),
-                    hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp),
+                    hintStyle: TextStyle(
+                        color: AppColors.textSecondary, fontSize: 14.sp),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.all(16.w),
                   ),
@@ -189,11 +203,14 @@ class _BorrowFormView extends StatelessWidget {
                   child: DropdownButton<String>(
                     value: logic.pickupLocation,
                     isExpanded: true,
-                    icon: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textSecondary),
+                    icon: Icon(Icons.keyboard_arrow_down_rounded,
+                        color: AppColors.textSecondary),
                     items: logic.pickupLocations.map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(value, style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary)),
+                        child: Text(value,
+                            style: TextStyle(
+                                fontSize: 14.sp, color: AppColors.textPrimary)),
                       );
                     }).toList(),
                     onChanged: logic.setPickupLocation,
@@ -213,7 +230,8 @@ class _BorrowFormView extends StatelessWidget {
                       value: logic.agreedToTerms,
                       onChanged: logic.setAgreedToTerms,
                       activeColor: const Color(0xFF9E86E1),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4.r)),
                     ),
                   ),
                   SizedBox(width: 12.w),
@@ -240,7 +258,7 @@ class _BorrowFormView extends StatelessWidget {
                     style: TextStyle(color: Colors.red, fontSize: 12.sp),
                   ),
                 ),
-                
+
               SizedBox(
                 width: double.infinity,
                 height: 56.h,
@@ -248,10 +266,11 @@ class _BorrowFormView extends StatelessWidget {
                   onPressed: logic.isLoading
                       ? null
                       : () async {
-                          final transactionId = await logic.submitBorrowRequest(bookId);
+                          final transactionId =
+                              await logic.submitBorrowRequest(bookId, context);
                           if (transactionId != null) {
                             if (context.mounted) {
-                              context.pushReplacement('/borrow-success', extra: {
+                              context.go('/borrow-success', extra: {
                                 'transactionId': transactionId,
                                 'bookTitle': book.title,
                                 'deadline': returnDate,
@@ -300,7 +319,8 @@ class _BorrowFormView extends StatelessWidget {
     );
   }
 
-  Widget _buildReadOnlyField(String text, {IconData? icon, bool isGrey = false}) {
+  Widget _buildReadOnlyField(String text,
+      {IconData? icon, bool isGrey = false}) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -319,7 +339,8 @@ class _BorrowFormView extends StatelessWidget {
               color: isGrey ? AppColors.textSecondary : AppColors.textPrimary,
             ),
           ),
-          if (icon != null) Icon(icon, size: 20.w, color: AppColors.textPrimary),
+          if (icon != null)
+            Icon(icon, size: 20.w, color: AppColors.textPrimary),
         ],
       ),
     );

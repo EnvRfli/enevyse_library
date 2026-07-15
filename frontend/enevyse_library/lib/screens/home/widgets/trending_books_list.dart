@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../models/mock_book.dart';
+import '../../../models/book.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'book_card.dart';
 
 class TrendingBooksList extends StatelessWidget {
   final String title;
-  final List<MockBook> books;
+  final List<Book> books;
 
   const TrendingBooksList(
       {super.key, required this.title, required this.books});

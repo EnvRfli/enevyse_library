@@ -1,11 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../core/network/api_client.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/transaction_provider.dart';
 
 class BorrowLogic extends ChangeNotifier {
-  final ApiClient _apiClient = ApiClient();
-
   String _pickupLocation = 'Main Library — Front Desk';
   String get pickupLocation => _pickupLocation;
 
@@ -53,7 +51,8 @@ class BorrowLogic extends ChangeNotifier {
     }
   }
 
-  Future<String?> submitBorrowRequest(String bookId) async {
+  Future<String?> submitBorrowRequest(
+      String bookId, BuildContext context) async {
     if (!_agreedToTerms) {
       _errorMessage = 'error_agree_terms'.tr();
       notifyListeners();
@@ -65,26 +64,18 @@ class BorrowLogic extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiClient.post(
-        Microservice.transaction,
-        '/api/v1/transactions/borrow',
-        body: {
-          'book_id': bookId,
-          'pickup_location': _pickupLocation,
-        },
-      );
+      final transactionProvider =
+          Provider.of<TransactionProvider>(context, listen: false);
+      final transaction =
+          await transactionProvider.borrowBook(bookId, _pickupLocation);
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+      if (transaction != null) {
         _isLoading = false;
         notifyListeners();
-        // Return ID if exists, otherwise generate a mock one for presentation
-        return data['data']?['id'] ?? data['id'] ?? 'LB-20260714-118';
-      } else if (response.statusCode == 400) {
-        final data = jsonDecode(response.body);
-        _errorMessage = data['message'] ?? 'error_limit_exceeded'.tr();
+        return transaction.id;
       } else {
-        _errorMessage = 'error_unknown'.tr();
+        _errorMessage =
+            transactionProvider.errorMessage ?? 'error_unknown'.tr();
       }
     } catch (e) {
       _errorMessage = 'error_connection'.tr();

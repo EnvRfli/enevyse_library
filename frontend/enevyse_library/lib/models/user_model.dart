@@ -3,12 +3,14 @@ class UserModel {
   final String name;
   final String email;
   final String role;
+  final List<String> preferredCategories;
 
   UserModel({
     required this.id,
     required this.name,
     required this.email,
     required this.role,
+    this.preferredCategories = const [],
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -17,6 +19,9 @@ class UserModel {
       name: json['name'] ?? '',
       email: json['email'] ?? '',
       role: json['role'] ?? 'user',
+      preferredCategories: json['preferred_categories'] != null
+          ? List<String>.from(json['preferred_categories'])
+          : [],
     );
   }
 }

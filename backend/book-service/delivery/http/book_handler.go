@@ -42,6 +42,7 @@ func (h *BookHandler) GetAllBooks(c *fiber.Ctx) error {
 	title := c.Query("title")
 	category := c.Query("category")
 	language := c.Query("language")
+	sortBy := c.Query("sort_by")
 	
 	minRatingStr := c.Query("min_rating")
 	var minRating float64
@@ -56,6 +57,7 @@ func (h *BookHandler) GetAllBooks(c *fiber.Ctx) error {
 		Category:  category,
 		MinRating: minRating,
 		Language:  language,
+		SortBy:    sortBy,
 	}
 
 	books, err := h.bookUsecase.GetAllBooks(filter)

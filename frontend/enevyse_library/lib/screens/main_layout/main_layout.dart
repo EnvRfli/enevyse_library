@@ -36,7 +36,33 @@ class _MainLayoutView extends StatelessWidget {
       const HomeScreen(),
       const ExploreScreen(),
       const HistoryScreen(),
-      const Scaffold(body: Center(child: Text('Profile'))), // Placeholder
+      Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Profile', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final authProv = Provider.of<AuthProvider>(context, listen: false);
+                  await authProv.logout();
+                  if (context.mounted) {
+                    context.go('/login');
+                  }
+                },
+                icon: const Icon(Icons.logout),
+                label: const Text('Logout'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade100,
+                  foregroundColor: Colors.red.shade900,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     ];
 
     final authProvider = Provider.of<AuthProvider>(context);
