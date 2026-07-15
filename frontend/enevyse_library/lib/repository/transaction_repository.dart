@@ -18,8 +18,14 @@ class TransactionRepository {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data['transaction'] != null) {
-          return Transaction.fromJson(data['transaction']);
+        if (data is Map<String, dynamic>) {
+          if (data.containsKey('transaction')) {
+            return Transaction.fromJson(data['transaction']);
+          } else if (data.containsKey('data')) {
+            return Transaction.fromJson(data['data']);
+          } else {
+            return Transaction.fromJson(data);
+          }
         }
       }
       return null;
@@ -38,7 +44,9 @@ class TransactionRepository {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data['data'] is List) {
+        if (data is List) {
+          return data.map((item) => Transaction.fromJson(item)).toList();
+        } else if (data is Map && data['data'] is List) {
           return (data['data'] as List)
               .map((item) => Transaction.fromJson(item))
               .toList();
@@ -46,6 +54,7 @@ class TransactionRepository {
       }
       return [];
     } catch (e) {
+      print('Error in getMyTransactions: $e');
       return [];
     }
   }
@@ -59,8 +68,12 @@ class TransactionRepository {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data['data'] != null) {
-          return Transaction.fromJson(data['data']);
+        if (data is Map<String, dynamic>) {
+          if (data.containsKey('data')) {
+            return Transaction.fromJson(data['data']);
+          } else {
+            return Transaction.fromJson(data);
+          }
         }
       }
       return null;

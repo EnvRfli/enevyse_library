@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../theme/app_colors.dart';
-import '../../../models/mock_transaction.dart';
+import '../../../models/transaction.dart';
 
 class BorrowStatusTimeline extends StatelessWidget {
-  final MockTransaction transaction;
+  final Transaction transaction;
 
   const BorrowStatusTimeline({super.key, required this.transaction});
 
@@ -142,8 +142,8 @@ class BorrowStatusTimeline extends StatelessWidget {
     // 1. Request Submitted
     steps.add(_TimelineStep(
       title: 'request_submitted'.tr(),
-      subtitle: transaction.createdAt != null ? dateFormat.format(transaction.createdAt!) : 'Pending',
-      state: transaction.createdAt != null ? _StepState.completed : _StepState.pending,
+      subtitle: dateFormat.format(transaction.createdAt),
+      state: _StepState.completed,
     ));
 
     // 2. Approved
@@ -152,7 +152,7 @@ class BorrowStatusTimeline extends StatelessWidget {
       subtitle: transaction.approvedAt != null ? dateFormat.format(transaction.approvedAt!) : 'Pending',
       state: transaction.approvedAt != null 
           ? _StepState.completed 
-          : (transaction.createdAt != null ? _StepState.active : _StepState.pending),
+          : _StepState.active,
     ));
 
     // 3. Picked Up

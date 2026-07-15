@@ -53,4 +53,43 @@ class Transaction {
       book: json['book'] != null ? Book.fromJson(json['book']) : null,
     );
   }
+
+  int get daysLeft {
+    final now = DateTime.now();
+    return dueDate.difference(now).inDays;
+  }
+
+  Transaction copyWith({
+    String? id,
+    String? borrowId,
+    String? userId,
+    String? bookId,
+    String? status,
+    String? pickupLocation,
+    DateTime? borrowDate,
+    DateTime? dueDate,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? approvedAt,
+    DateTime? pickedUpAt,
+    DateTime? returnedAt,
+    Book? book,
+  }) {
+    return Transaction(
+      id: id ?? this.id,
+      borrowId: borrowId ?? this.borrowId,
+      userId: userId ?? this.userId,
+      bookId: bookId ?? this.bookId,
+      status: status ?? this.status,
+      pickupLocation: pickupLocation ?? this.pickupLocation,
+      borrowDate: borrowDate ?? this.borrowDate,
+      dueDate: dueDate ?? this.dueDate,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      approvedAt: approvedAt ?? this.approvedAt,
+      pickedUpAt: pickedUpAt ?? this.pickedUpAt,
+      returnedAt: returnedAt ?? this.returnedAt,
+      book: book ?? this.book,
+    );
+  }
 }

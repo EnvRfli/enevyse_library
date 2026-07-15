@@ -5,38 +5,50 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../theme/app_colors.dart';
-import 'logic/borrow_detail_logic.dart';
+import '../../providers/transaction_provider.dart';
+import '../../models/transaction.dart';
 import 'widgets/borrow_status_timeline.dart';
 
-class BorrowDetailScreen extends StatelessWidget {
+class BorrowDetailScreen extends StatefulWidget {
   final String transactionId;
 
   const BorrowDetailScreen({super.key, required this.transactionId});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => BorrowDetailLogic(transactionId: transactionId),
-      child: const _BorrowDetailView(),
-    );
-  }
+  State<BorrowDetailScreen> createState() => _BorrowDetailScreenState();
 }
 
-class _BorrowDetailView extends StatelessWidget {
-  const _BorrowDetailView();
+class _BorrowDetailScreenState extends State<BorrowDetailScreen> {
+  bool _isLoading = true;
+  Transaction? _transaction;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTransaction();
+  }
+
+  Future<void> _loadTransaction() async {
+    final provider = context.read<TransactionProvider>();
+    final transaction = await provider.getTransaction(widget.transactionId);
+    if (mounted) {
+      setState(() {
+        _transaction = transaction;
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final logic = Provider.of<BorrowDetailLogic>(context);
-
-    if (logic.isLoading) {
+    if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    final transaction = logic.transaction;
+    final transaction = _transaction;
     if (transaction == null) {
       return Scaffold(
         backgroundColor: Colors.white,
@@ -80,8 +92,14 @@ class _BorrowDetailView extends StatelessWidget {
                     width: 70.w,
                     height: 100.h,
                     decoration: BoxDecoration(
-                      color: transaction.book.placeholderColor,
+                      color: Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(12.r),
+                      image: transaction.book?.coverUrl != null && transaction.book!.coverUrl!.isNotEmpty
+                          ? DecorationImage(
+                              image: NetworkImage(transaction.book!.coverUrl!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
                   ),
                   SizedBox(width: 16.w),
@@ -90,7 +108,7 @@ class _BorrowDetailView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          transaction.book.title,
+                          transaction.book?.title ?? 'Unknown Book',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18.sp,
@@ -99,7 +117,7 @@ class _BorrowDetailView extends StatelessWidget {
                         ),
                         SizedBox(height: 4.h),
                         Text(
-                          transaction.book.author,
+                          transaction.book?.author ?? 'Unknown Author',
                           style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp),
                         ),
                         SizedBox(height: 8.h),
@@ -133,7 +151,7 @@ class _BorrowDetailView extends StatelessWidget {
                   _buildInfoCard('pickup'.tr(), transaction.pickupLocation),
                   _buildInfoCard(
                     'status'.tr(),
-                    transaction.status.name.toUpperCase(),
+                    transaction.status.toUpperCase(),
                     isStatus: true,
                   ),
                 ],

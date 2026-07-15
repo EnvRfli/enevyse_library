@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
-import '../../../models/mock_transaction.dart';
+import '../../../models/transaction.dart';
 import '../../../theme/app_colors.dart';
 
 class BorrowingCard extends StatelessWidget {
-  final MockTransaction transaction;
+  final Transaction transaction;
   final bool isHistory;
 
   const BorrowingCard({super.key, required this.transaction, this.isHistory = false});
@@ -73,8 +73,14 @@ class BorrowingCard extends StatelessWidget {
                 width: 60.w,
                 height: 85.h,
                 decoration: BoxDecoration(
-                  color: transaction.book.placeholderColor,
+                  color: Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(12.r),
+                  image: transaction.book?.coverUrl != null && transaction.book!.coverUrl!.isNotEmpty
+                      ? DecorationImage(
+                          image: NetworkImage(transaction.book!.coverUrl!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
               ),
               SizedBox(width: 16.w),
@@ -84,7 +90,7 @@ class BorrowingCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      transaction.book.title,
+                      transaction.book?.title ?? 'Unknown Book',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16.sp,

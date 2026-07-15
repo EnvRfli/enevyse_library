@@ -3,29 +3,54 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
-import 'logic/history_logic.dart';
+import '../../providers/transaction_provider.dart';
 import 'widgets/segmented_tab.dart';
 import 'widgets/borrowing_card.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => HistoryLogic(),
-      child: const _HistoryScreenView(),
-    );
-  }
+  State<HistoryScreen> createState() => _HistoryScreenState();
 }
 
-class _HistoryScreenView extends StatelessWidget {
-  const _HistoryScreenView();
+class _HistoryScreenState extends State<HistoryScreen> {
+  bool _isCurrentTab = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TransactionProvider>().fetchMyTransactions();
+    });
+  }
+
+  void _setTab(bool isCurrent) {
+    setState(() {
+      _isCurrentTab = isCurrent;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final logic = Provider.of<HistoryLogic>(context);
-    final transactions = logic.isCurrentTab ? logic.currentTransactions : logic.historyTransactions;
+    final provider = context.watch<TransactionProvider>();
+    final allTransactions = provider.myTransactions;
+
+    final currentTransactions = allTransactions
+        .where((t) =>
+            t.status == 'PENDING' ||
+            t.status == 'APPROVED' ||
+            t.status == 'BORROWED')
+        .toList();
+    final historyTransactions = allTransactions
+        .where((t) =>
+            t.status == 'RETURNED' ||
+            t.status == 'REJECTED' ||
+            t.status == 'CANCELLED')
+        .toList();
+
+    final transactions =
+        _isCurrentTab ? currentTransactions : historyTransactions;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -46,29 +71,31 @@ class _HistoryScreenView extends StatelessWidget {
               ),
             ),
             SizedBox(height: 24.h),
-            
+
             // Tabs
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: SegmentedTab(
                 leftLabel: 'current_borrowing'.tr(),
                 rightLabel: 'borrowing_history'.tr(),
-                isLeftActive: logic.isCurrentTab,
-                onLeftTap: () => logic.setTab(true),
-                onRightTap: () => logic.setTab(false),
+                isLeftActive: _isCurrentTab,
+                onLeftTap: () => _setTab(true),
+                onRightTap: () => _setTab(false),
               ),
             ),
             SizedBox(height: 24.h),
 
             // Content
             Expanded(
-              child: logic.isLoading
+              child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : transactions.isEmpty
                       ? Center(
                           child: Text(
                             'no_transactions'.tr(),
-                            style: TextStyle(color: AppColors.textSecondary, fontSize: 16.sp),
+                            style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 16.sp),
                           ),
                         )
                       : ListView.builder(
@@ -78,7 +105,7 @@ class _HistoryScreenView extends StatelessWidget {
                           itemBuilder: (context, index) {
                             return BorrowingCard(
                               transaction: transactions[index],
-                              isHistory: !logic.isCurrentTab,
+                              isHistory: !_isCurrentTab,
                             );
                           },
                         ),
