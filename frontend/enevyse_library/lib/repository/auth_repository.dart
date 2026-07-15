@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../core/network/api_client.dart';
+import '../models/user_model.dart';
 
 class AuthRepository {
   final ApiClient _apiClient = ApiClient();
@@ -21,8 +22,12 @@ class AuthRepository {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final token = data['token'];
+        final userName = data['user']?['name'];
         if (token != null) {
           await _secureStorage.write(key: 'jwt_token', value: token);
+          if (userName != null) {
+            await _secureStorage.write(key: 'user_name', value: userName);
+          }
           return true;
         }
       } else if (response.statusCode == 401) {
@@ -41,6 +46,58 @@ class AuthRepository {
 
   Future<void> logout() async {
     await _secureStorage.delete(key: 'jwt_token');
+    await _secureStorage.delete(key: 'user_name');
+  }
+
+  Future<bool> register(String name, String email, String password) async {
+    try {
+      final response = await _apiClient.post(
+        Microservice.identity,
+        '/api/v1/auth/register',
+        body: {
+          'name': name,
+          'email': email,
+          'password': password,
+        },
+        requiresAuth: false,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        final token = data['token'];
+        if (token != null) {
+          await _secureStorage.write(key: 'jwt_token', value: token);
+          return true;
+        }
+      } else if (response.statusCode == 409) {
+        final data = jsonDecode(response.body);
+        throw Exception(data['error'] ?? 'email_already_registered');
+      }
+      throw Exception('register_failed');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<UserModel?> getMe() async {
+    try {
+      final response = await _apiClient.get(
+        Microservice.identity,
+        '/api/v1/me',
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return UserModel.fromJson(data);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<String?> getUserName() async {
+    return await _secureStorage.read(key: 'user_name');
   }
 
   Future<bool> isLoggedIn() async {

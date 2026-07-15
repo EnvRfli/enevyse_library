@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../../theme/app_colors.dart';
 import '../../../widgets/custom_text_field.dart';
 import '../../../providers/auth_provider.dart';
-import '../logic/login_logic.dart';
+import '../../../theme/app_colors.dart';
+import '../logic/register_logic.dart';
 
-class LoginForm extends StatelessWidget {
-  const LoginForm({super.key});
+class RegisterForm extends StatelessWidget {
+  const RegisterForm({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Obtain the logic and auth provider
-    final logic = Provider.of<LoginLogic>(context);
+    final logic = Provider.of<RegisterLogic>(context);
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Expanded(
@@ -37,29 +35,37 @@ class LoginForm extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Email Field
                 CustomTextField(
-                  controller: logic.emailController,
+                  hintText: 'name'.tr(),
+                  controller: logic.nameController,
+                  prefixIcon: Icons.person_outline_rounded,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'name_required'.tr();
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.h),
+                CustomTextField(
                   hintText: 'email'.tr(),
-                  prefixIcon: Icons.person_outline,
+                  controller: logic.emailController,
+                  prefixIcon: Icons.email_outlined,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'email_required'.tr();
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                        .hasMatch(value)) {
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
                       return 'invalid_email'.tr();
                     }
                     return null;
                   },
                 ),
                 SizedBox(height: 16.h),
-
-                // Password Field
                 CustomTextField(
-                  controller: logic.passwordController,
                   hintText: 'password'.tr(),
-                  prefixIcon: Icons.lock_outline,
+                  controller: logic.passwordController,
+                  prefixIcon: Icons.lock_outline_rounded,
                   isPassword: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -68,62 +74,45 @@ class LoginForm extends StatelessWidget {
                     if (value.length < 8) {
                       return 'password_too_short'.tr();
                     }
+                    if (!RegExp(r'^(?=.*[A-Z])(?=.*\d).*$').hasMatch(value)) {
+                      return 'password_complexity'.tr();
+                    }
                     return null;
                   },
                 ),
-                SizedBox(height: 8.h),
-
-                // Forgot Password (Right Aligned)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'forgot_password'.tr(),
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: AppColors.primary,
-                          ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 24.h),
-
-                // Login Button
+                SizedBox(height: 32.h),
                 ElevatedButton(
                   onPressed: (!logic.isFormValid || authProvider.isLoading)
                       ? null
-                      : () => logic.handleLogin(context),
+                      : () => logic.handleRegister(context),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 16.h),
                   ),
                   child: authProvider.isLoading
                       ? SizedBox(
-                          height: 24.h,
                           width: 24.h,
+                          height: 24.h,
                           child: const CircularProgressIndicator(
                             color: Colors.white,
                             strokeWidth: 2,
                           ),
                         )
-                      : Text('login'.tr()),
+                      : Text('register'.tr()),
                 ),
-
                 SizedBox(height: 48.h),
-
-                // Register
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'register_prompt'.tr(),
+                      'already_have_account'.tr(),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     TextButton(
                       onPressed: () {
-                        context.push('/register');
+                        context.pop();
                       },
                       child: Text(
-                        'register'.tr(),
+                        'login'.tr(),
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                               color: AppColors.primary,
                             ),

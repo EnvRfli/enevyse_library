@@ -28,7 +28,7 @@ class EnevyseLibraryApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()..checkAuth()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(390, 844),

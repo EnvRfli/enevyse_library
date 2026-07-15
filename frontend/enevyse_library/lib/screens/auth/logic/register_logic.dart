@@ -5,14 +5,16 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../providers/auth_provider.dart';
 
-class LoginLogic extends ChangeNotifier {
+class RegisterLogic extends ChangeNotifier {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   bool isFormValid = false;
 
-  LoginLogic() {
+  RegisterLogic() {
+    nameController.addListener(_validateForm);
     emailController.addListener(_validateForm);
     passwordController.addListener(_validateForm);
   }
@@ -30,17 +32,20 @@ class LoginLogic extends ChangeNotifier {
 
   @override
   void dispose() {
+    nameController.removeListener(_validateForm);
     emailController.removeListener(_validateForm);
     passwordController.removeListener(_validateForm);
+    nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> handleLogin(BuildContext context) async {
+  Future<void> handleRegister(BuildContext context) async {
     if (formKey.currentState?.validate() ?? false) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.login(
+      final success = await authProvider.register(
+        nameController.text.trim(),
         emailController.text.trim(),
         passwordController.text,
       );
