@@ -9,12 +9,11 @@ enum Microservice {
 }
 
 class ApiClient {
-  static const String _localhost =
-      'http://10.133.4.7'; // Diubah untuk Emulator Mumu Player
-
-  static const String identityBaseUrl = '$_localhost:3001';
-  static const String bookBaseUrl = '$_localhost:8002';
-  static const String transactionBaseUrl = '$_localhost:8003';
+  static const String identityBaseUrl =
+      'https://vyse-identity-service.onrender.com';
+  static const String bookBaseUrl = 'https://vyse-book-service.onrender.com';
+  static const String transactionBaseUrl =
+      'https://vyse-transaction-service.onrender.com';
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
