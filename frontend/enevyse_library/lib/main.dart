@@ -51,6 +51,7 @@ class EnevyseLibraryApp extends StatelessWidget {
         builder: (context, child) {
           final themeProvider = Provider.of<ThemeProvider>(context);
           return MaterialApp.router(
+            key: ValueKey(context.locale.toString()),
             title: 'Vyse Lib',
             debugShowCheckedModeBanner: false,
             localizationsDelegates: context.localizationDelegates,

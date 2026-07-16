@@ -243,6 +243,27 @@ class BookProvider extends ChangeNotifier {
     }
   }
 
+  /// Clears all cached book data (called on logout)
+  void clearState() {
+    books = [];
+    recommendedBooks = [];
+    newArrivalBooks = [];
+    favoriteBooks = [];
+    favoriteBookIds = {};
+    selectedBook = null;
+    booksErrorMessage = null;
+    bookDetailErrorMessage = null;
+    searchQuery = '';
+    selectedCategory = 'All';
+    selectedMinRating = null;
+    selectedSortBy = 'created_at_desc';
+    currentExplorePage = 1;
+    hasMoreExploreBooks = true;
+    _isCategoriesLoaded = false;
+    categories = ['All'];
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _debounce?.cancel();
