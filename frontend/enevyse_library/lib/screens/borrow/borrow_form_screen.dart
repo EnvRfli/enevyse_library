@@ -46,28 +46,22 @@ class _BorrowFormView extends StatelessWidget {
     final dateFormat = DateFormat('dd/MM/yyyy');
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFBF7),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Container(
             padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border),
-            ),
             child: Icon(Icons.arrow_back_ios_new_rounded,
-                size: 16.w, color: AppColors.textPrimary),
+                size: 16.w, color: AppColors.textPrimary, weight: 800),
           ),
           onPressed: () => context.pop(),
         ),
         title: Text(
           'borrow_request'.tr(),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: AppColors.textPrimary,
               ),
         ),
         centerTitle: false,
@@ -206,9 +200,17 @@ class _BorrowFormView extends StatelessWidget {
                     icon: Icon(Icons.keyboard_arrow_down_rounded,
                         color: AppColors.textSecondary),
                     items: logic.pickupLocations.map((String value) {
+                      String translatedLabel = value;
+                      if (value == 'Main Library — Front Desk') {
+                        translatedLabel = 'pickup_main_library'.tr();
+                      } else if (value == 'North Wing — Lockers') {
+                        translatedLabel = 'pickup_north_wing'.tr();
+                      } else if (value == 'South Branch') {
+                        translatedLabel = 'pickup_south_branch'.tr();
+                      }
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(value,
+                        child: Text(translatedLabel,
                             style: TextStyle(
                                 fontSize: 14.sp, color: AppColors.textPrimary)),
                       );
@@ -249,19 +251,21 @@ class _BorrowFormView extends StatelessWidget {
               ),
               SizedBox(height: 32.h),
 
-
               SizedBox(
                 width: double.infinity,
                 height: 56.h,
                 child: ElevatedButton(
-                  onPressed: logic.isLoading || logic.purpose.isEmpty || !logic.agreedToTerms
+                  onPressed: logic.isLoading ||
+                          logic.purpose.isEmpty ||
+                          !logic.agreedToTerms
                       ? null
                       : () async {
                           final borrowId =
                               await logic.submitBorrowRequest(bookId, context);
                           if (borrowId != null) {
                             if (context.mounted) {
-                              context.pushReplacement('/borrow-success', extra: {
+                              context
+                                  .pushReplacement('/borrow-success', extra: {
                                 'borrowId': borrowId,
                                 'bookTitle': book.title,
                                 'deadline': returnDate,

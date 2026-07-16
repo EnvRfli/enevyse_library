@@ -20,7 +20,7 @@ class BorrowStatusTimeline extends StatelessWidget {
           'borrow_status'.tr(),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: AppColors.textPrimary,
               ),
         ),
         SizedBox(height: 16.h),
@@ -89,7 +89,9 @@ class BorrowStatusTimeline extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: iconBgColor,
                   shape: BoxShape.circle,
-                  border: state == _StepState.pending ? Border.all(color: const Color(0xFFE5E6EB)) : null,
+                  border: state == _StepState.pending
+                      ? Border.all(color: const Color(0xFFE5E6EB))
+                      : null,
                 ),
                 child: Center(child: iconChild),
               ),
@@ -97,7 +99,9 @@ class BorrowStatusTimeline extends StatelessWidget {
                 Expanded(
                   child: Container(
                     width: 2.w,
-                    color: state == _StepState.completed ? const Color(0xFF8B9CEB) : const Color(0xFFE5E6EB),
+                    color: state == _StepState.completed
+                        ? const Color(0xFF8B9CEB)
+                        : const Color(0xFFE5E6EB),
                   ),
                 ),
             ],
@@ -115,7 +119,9 @@ class BorrowStatusTimeline extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14.sp,
-                      color: state == _StepState.pending ? const Color(0xFFB1B3C0) : AppColors.textPrimary,
+                      color: state == _StepState.pending
+                          ? const Color(0xFFB1B3C0)
+                          : AppColors.textPrimary,
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -149,19 +155,25 @@ class BorrowStatusTimeline extends StatelessWidget {
     // 2. Approved
     steps.add(_TimelineStep(
       title: 'approved'.tr(),
-      subtitle: transaction.approvedAt != null ? dateFormat.format(transaction.approvedAt!) : 'Pending',
-      state: transaction.approvedAt != null 
-          ? _StepState.completed 
+      subtitle: transaction.approvedAt != null
+          ? dateFormat.format(transaction.approvedAt!)
+          : 'Pending',
+      state: transaction.approvedAt != null
+          ? _StepState.completed
           : _StepState.active,
     ));
 
     // 3. Picked Up
     steps.add(_TimelineStep(
       title: 'book_picked_up'.tr(),
-      subtitle: transaction.pickedUpAt != null ? dateFormat.format(transaction.pickedUpAt!) : 'Pending',
+      subtitle: transaction.pickedUpAt != null
+          ? dateFormat.format(transaction.pickedUpAt!)
+          : 'Pending',
       state: transaction.pickedUpAt != null
           ? _StepState.completed
-          : (transaction.approvedAt != null ? _StepState.active : _StepState.pending),
+          : (transaction.approvedAt != null
+              ? _StepState.active
+              : _StepState.pending),
     ));
 
     // 4. Borrowing (Active)
@@ -170,14 +182,20 @@ class BorrowStatusTimeline extends StatelessWidget {
       subtitle: 'Due ${DateFormat('MMM d, yyyy').format(transaction.dueDate)}',
       state: transaction.returnedAt != null
           ? _StepState.completed
-          : (transaction.pickedUpAt != null ? _StepState.active : _StepState.pending),
+          : (transaction.pickedUpAt != null
+              ? _StepState.active
+              : _StepState.pending),
     ));
 
     // 5. Returned
     steps.add(_TimelineStep(
       title: 'returned'.tr(),
-      subtitle: transaction.returnedAt != null ? dateFormat.format(transaction.returnedAt!) : 'Pending',
-      state: transaction.returnedAt != null ? _StepState.completed : _StepState.pending,
+      subtitle: transaction.returnedAt != null
+          ? dateFormat.format(transaction.returnedAt!)
+          : 'Pending',
+      state: transaction.returnedAt != null
+          ? _StepState.completed
+          : _StepState.pending,
     ));
 
     return steps;
@@ -195,5 +213,6 @@ class _TimelineStep {
   final String subtitle;
   final _StepState state;
 
-  _TimelineStep({required this.title, required this.subtitle, required this.state});
+  _TimelineStep(
+      {required this.title, required this.subtitle, required this.state});
 }
