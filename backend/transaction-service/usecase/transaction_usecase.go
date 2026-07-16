@@ -164,3 +164,21 @@ func (u *transactionUsecase) ReturnBook(id uuid.UUID) (*domain.Transaction, erro
 
 	return tx, nil
 }
+
+func (u *transactionUsecase) ProcessScan(borrowID string) (*domain.Transaction, error) {
+	tx, err := u.txRepo.FindByBorrowID(borrowID)
+	if err != nil {
+		return nil, err
+	}
+	if tx == nil {
+		return nil, errors.New("transaction not found")
+	}
+
+	if tx.Status == domain.StatusApproved {
+		return u.PickupBook(tx.ID)
+	} else if tx.Status == domain.StatusBorrowing {
+		return u.ReturnBook(tx.ID)
+	}
+
+	return nil, errors.New("invalid transaction status for scanning")
+}

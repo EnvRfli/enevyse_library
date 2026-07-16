@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # RabbitMQ connection port
+      - "15672:15672" # Management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  identity-service:
+    build: 
+      context: ./identity-service
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./identity-service/.env
+
+  book-service:
+    build: 
+      context: ./book-service
+    ports:
+      - "8002:8002"
+    env_file:
+      - ./book-service/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  transaction-service:
+    build: 
+      context: ./transaction-service
+    ports:
+      - "8003:8003"
+    env_file:
+      - ./transaction-service/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy

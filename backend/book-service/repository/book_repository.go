@@ -35,15 +35,26 @@ func (r *bookRepository) FindAll(filter domain.BookFilter) ([]domain.Book, error
 	}
 
 	if filter.SortBy == "available_copies_asc" {
-		query = query.Order("available_copies ASC")
+		query = query.Order("available_copies ASC, id ASC")
 	} else if filter.SortBy == "created_at_desc" {
-		query = query.Order("created_at DESC")
+		query = query.Order("created_at DESC, id ASC")
 	} else if filter.SortBy == "rating_desc" {
-		query = query.Order("ratings DESC")
+		query = query.Order("ratings DESC, id ASC")
 	} else if filter.SortBy == "title_asc" {
-		query = query.Order("title ASC")
+		query = query.Order("title ASC, id ASC")
 	} else if filter.SortBy == "title_desc" {
-		query = query.Order("title DESC")
+		query = query.Order("title DESC, id ASC")
+	} else {
+		query = query.Order("created_at DESC, id ASC")
+	}
+
+	if filter.Limit > 0 {
+		page := filter.Page
+		if page <= 0 {
+			page = 1
+		}
+		offset := (page - 1) * filter.Limit
+		query = query.Offset(offset).Limit(filter.Limit)
 	}
 
 	result := query.Find(&books)

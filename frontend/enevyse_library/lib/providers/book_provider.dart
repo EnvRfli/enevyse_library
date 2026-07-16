@@ -11,6 +11,10 @@ class BookProvider extends ChangeNotifier {
   // State for Explore/List
   List<Book> books = [];
   bool isLoadingBooks = false;
+  bool isFetchingMore = false;
+  bool hasMoreExploreBooks = true;
+  int currentExplorePage = 1;
+  final int exploreLimit = 10;
   String? booksErrorMessage;
 
   String searchQuery = '';
@@ -33,6 +37,11 @@ class BookProvider extends ChangeNotifier {
   List<Book> newArrivalBooks = [];
   bool isLoadingHome = false;
 
+  // State for Favorites
+  List<Book> favoriteBooks = [];
+  Set<String> favoriteBookIds = {};
+  bool isLoadingFavorites = false;
+
   // --- Methods for Explore/List ---
 
   void onSearchChanged(String query) {
@@ -46,23 +55,33 @@ class BookProvider extends ChangeNotifier {
   void onCategorySelected(String category) {
     if (selectedCategory == category) return;
     selectedCategory = category;
-    fetchBooks();
+    fetchBooks(isRefresh: true);
   }
 
   void onMinRatingSelected(double? rating) {
     if (selectedMinRating == rating) return;
     selectedMinRating = rating;
-    fetchBooks();
+    fetchBooks(isRefresh: true);
   }
 
   void onSortBySelected(String sortBy) {
     if (selectedSortBy == sortBy) return;
     selectedSortBy = sortBy;
-    fetchBooks();
+    fetchBooks(isRefresh: true);
   }
 
-  Future<void> fetchBooks() async {
-    isLoadingBooks = true;
+  Future<void> fetchBooks({bool isRefresh = true}) async {
+    if (isRefresh) {
+      currentExplorePage = 1;
+      hasMoreExploreBooks = true;
+      isLoadingBooks = true;
+      books.clear();
+    } else {
+      if (!hasMoreExploreBooks || isFetchingMore) return;
+      isFetchingMore = true;
+      currentExplorePage++;
+    }
+    
     booksErrorMessage = null;
     notifyListeners();
 
@@ -72,13 +91,26 @@ class BookProvider extends ChangeNotifier {
         category: selectedCategory == 'All' ? null : selectedCategory,
         minRating: selectedMinRating,
         sortBy: selectedSortBy,
+        page: currentExplorePage,
+        limit: exploreLimit,
       );
       if (fetchedBooks != null) {
-        books = fetchedBooks;
+        if (fetchedBooks.length < exploreLimit) {
+          hasMoreExploreBooks = false;
+        }
+
+        if (isRefresh) {
+          books = fetchedBooks;
+        } else {
+          books.addAll(fetchedBooks);
+        }
 
         if (!_isCategoriesLoaded &&
             selectedCategory == 'All' &&
-            searchQuery.isEmpty) {
+            searchQuery.isEmpty &&
+            isRefresh) {
+          // Note: Full categories might not be available if paginated, 
+          // usually categories are fetched from a separate endpoint, but keeping this for now.
           final Set<String> uniqueCats = {'All'};
           for (var b in books) {
             uniqueCats.addAll(b.categories);
@@ -93,6 +125,7 @@ class BookProvider extends ChangeNotifier {
       booksErrorMessage = 'Error: $e';
     } finally {
       isLoadingBooks = false;
+      isFetchingMore = false;
       notifyListeners();
     }
   }
@@ -111,20 +144,29 @@ class BookProvider extends ChangeNotifier {
       }
 
       // 2. Fetch Recommended
-      // If user has preferred categories, fetch by the first one (as an example, or fetch all and filter).
-      // If not, fetch by available_copies_asc
-      if (preferredCategories.isNotEmpty) {
-        // Just using the first preferred category for the query, 
-        // ideally backend supports multiple categories in filter.
-        final recommended = await _bookRepository.getAllBooks(category: preferredCategories.first);
-        if (recommended != null) {
-          recommendedBooks = recommended.take(10).toList();
+      // We fetch a larger batch of books and then sort locally so that 
+      // books matching the user's preferred categories appear at the top.
+      final allBooksForRecommendation = await _bookRepository.getAllBooks(
+        sortBy: 'rating_desc', 
+        limit: 50,
+      );
+      
+      if (allBooksForRecommendation != null) {
+        if (preferredCategories.isNotEmpty) {
+          // Normalize preferred categories for case-insensitive comparison
+          final lowerPrefCats = preferredCategories.map((c) => c.toLowerCase()).toSet();
+          
+          allBooksForRecommendation.sort((a, b) {
+            final aMatches = a.categories.any((c) => lowerPrefCats.contains(c.toLowerCase()));
+            final bMatches = b.categories.any((c) => lowerPrefCats.contains(c.toLowerCase()));
+            
+            if (aMatches && !bMatches) return -1;
+            if (!aMatches && bMatches) return 1;
+            return 0; // maintain original order (rating_desc) for ties
+          });
         }
-      } else {
-        final recommended = await _bookRepository.getAllBooks(sortBy: 'available_copies_asc');
-        if (recommended != null) {
-          recommendedBooks = recommended.take(10).toList();
-        }
+        
+        recommendedBooks = allBooksForRecommendation.take(10).toList();
       }
     } catch (e) {
       // Handle error if needed
@@ -154,6 +196,50 @@ class BookProvider extends ChangeNotifier {
     } finally {
       isLoadingBookDetail = false;
       notifyListeners();
+    }
+  }
+
+  // --- Methods for Favorites ---
+
+  Future<void> fetchFavorites() async {
+    isLoadingFavorites = true;
+    notifyListeners();
+    try {
+      final fetchedFavorites = await _bookRepository.getFavorites();
+      if (fetchedFavorites != null) {
+        favoriteBooks = fetchedFavorites;
+        favoriteBookIds = fetchedFavorites.map((b) => b.id).toSet();
+      }
+    } catch (e) {
+      // Handle error if needed
+    } finally {
+      isLoadingFavorites = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> toggleFavorite(String bookId) async {
+    final isCurrentlyFavorite = favoriteBookIds.contains(bookId);
+    
+    // Optimistic UI update
+    if (isCurrentlyFavorite) {
+      favoriteBookIds.remove(bookId);
+      favoriteBooks.removeWhere((b) => b.id == bookId);
+    } else {
+      favoriteBookIds.add(bookId);
+      if (selectedBook != null && selectedBook!.id == bookId) {
+        favoriteBooks.add(selectedBook!);
+      }
+    }
+    notifyListeners();
+
+    try {
+      final isFavoriteNow = await _bookRepository.toggleFavorite(bookId);
+      if (isFavoriteNow != !isCurrentlyFavorite) {
+        fetchFavorites(); // Resync if optimistic update was wrong
+      }
+    } catch (e) {
+      fetchFavorites(); // Resync on error
     }
   }
 

@@ -22,6 +22,7 @@ class ExploreScreen extends StatefulWidget {
 
 class _ExploreScreenState extends State<ExploreScreen> {
   bool _isGridView = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -30,6 +31,19 @@ class _ExploreScreenState extends State<ExploreScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BookProvider>().fetchBooks();
     });
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 100) {
+        context.read<BookProvider>().fetchBooks(isRefresh: false);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -42,23 +56,24 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Text(
+          'explore_books'.tr(),
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 20.sp,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 16.h),
-            // Header
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Text(
-                'explore_books'.tr(),
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-              ),
-            ),
-            SizedBox(height: 20.h),
 
             // Search Bar
             SearchBarWidget(
@@ -163,9 +178,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
             // Book List
             Expanded(
-              child: provider.isLoadingBooks
+              child: provider.isLoadingBooks && provider.books.isEmpty
                   ? const Center(child: CircularProgressIndicator())
-                  : provider.booksErrorMessage != null
+                  : provider.booksErrorMessage != null && provider.books.isEmpty
                       ? Center(
                           child: Text(provider.booksErrorMessage!,
                               style: const TextStyle(color: Colors.red)))
@@ -173,6 +188,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           ? const Center(child: Text('No books found'))
                           : _isGridView
                               ? GridView.builder(
+                                  controller: _scrollController,
                                   padding:
                                       EdgeInsets.symmetric(horizontal: 24.w),
                                   physics: const BouncingScrollPhysics(),
@@ -183,8 +199,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                     crossAxisSpacing: 16.w,
                                     childAspectRatio: 0.52,
                                   ),
-                                  itemCount: provider.books.length,
+                                  itemCount: provider.books.length + (provider.isFetchingMore ? 1 : 0),
                                   itemBuilder: (context, index) {
+                                    if (index == provider.books.length) {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    }
                                     // Use BookCard for grid view
                                     return BookCard(
                                         book: provider.books[index],
@@ -192,11 +212,19 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                   },
                                 )
                               : ListView.builder(
+                                  controller: _scrollController,
                                   padding:
                                       EdgeInsets.symmetric(horizontal: 24.w),
                                   physics: const BouncingScrollPhysics(),
-                                  itemCount: provider.books.length,
+                                  itemCount: provider.books.length + (provider.isFetchingMore ? 1 : 0),
                                   itemBuilder: (context, index) {
+                                    if (index == provider.books.length) {
+                                      return Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                                        child: const Center(
+                                            child: CircularProgressIndicator()),
+                                      );
+                                    }
                                     return BookListTile(
                                         book: provider.books[index]);
                                   },

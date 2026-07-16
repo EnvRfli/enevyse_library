@@ -11,6 +11,8 @@ import 'repository/book_repository.dart';
 
 import 'providers/transaction_provider.dart';
 
+import 'providers/theme_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
@@ -33,10 +35,12 @@ class EnevyseLibraryApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()..checkAuth()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         Provider<BookRepository>(create: (_) => BookRepository()),
         ChangeNotifierProxyProvider<BookRepository, BookProvider>(
           create: (context) => BookProvider(context.read<BookRepository>()),
-          update: (context, repository, previous) => previous ?? BookProvider(repository),
+          update: (context, repository, previous) =>
+              previous ?? BookProvider(repository),
         ),
         ChangeNotifierProvider(create: (_) => TransactionProvider()),
       ],
@@ -45,13 +49,16 @@ class EnevyseLibraryApp extends StatelessWidget {
         minTextAdapt: true,
         splitScreenMode: true,
         builder: (context, child) {
+          final themeProvider = Provider.of<ThemeProvider>(context);
           return MaterialApp.router(
-            title: 'Enevyse Library',
+            title: 'Vyse Lib',
             debugShowCheckedModeBanner: false,
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,
             locale: context.locale,
             theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
             routerConfig: AppRouter.router,
           );
         },

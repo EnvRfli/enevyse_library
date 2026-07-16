@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../core/network/api_client.dart';
 import '../models/user_model.dart';
@@ -98,6 +99,46 @@ class AuthRepository {
 
   Future<String?> getUserName() async {
     return await _secureStorage.read(key: 'user_name');
+  }
+
+  Future<UserModel?> updateProfile(Map<String, dynamic> data) async {
+    try {
+      final response = await _apiClient.put(
+        Microservice.identity,
+        '/api/v1/me',
+        body: data,
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        final resData = jsonDecode(response.body);
+        return UserModel.fromJson(resData);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<String?> uploadProfilePicture(File image) async {
+    try {
+      final response = await _apiClient.postMultipart(
+        Microservice.identity,
+        '/api/v1/me/profile-picture',
+        fileField: 'profile_picture',
+        filePath: image.path,
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final respStr = await response.stream.bytesToString();
+        final data = jsonDecode(respStr);
+        return data['cover_url']; // Reusing the same response key name or 'profile_picture_url' depending on backend
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<bool> isLoggedIn() async {

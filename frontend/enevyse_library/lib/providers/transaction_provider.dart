@@ -76,7 +76,7 @@ class TransactionProvider extends ChangeNotifier {
         errorMessage = 'Failed to borrow book';
       }
     } catch (e) {
-      errorMessage = e.toString();
+      errorMessage = e.toString().replaceAll('Exception: ', '');
     }
 
     isLoading = false;

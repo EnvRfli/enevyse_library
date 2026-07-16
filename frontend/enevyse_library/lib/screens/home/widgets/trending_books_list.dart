@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../models/book.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 import 'book_card.dart';
 
 class TrendingBooksList extends StatelessWidget {
@@ -29,7 +30,12 @@ class TrendingBooksList extends StatelessWidget {
                     ),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.push('/book-list', extra: {
+                    'title': title,
+                    'books': books,
+                  });
+                },
                 child: Text(
                   'see_all'.tr(),
                   style: TextStyle(

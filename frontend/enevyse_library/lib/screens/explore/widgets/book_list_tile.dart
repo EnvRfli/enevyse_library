@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../theme/app_colors.dart';
+import '../../../widgets/star_rating_widget.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../models/book.dart';
 
@@ -48,13 +49,14 @@ class BookListTile extends StatelessWidget {
                       child: Image.network(
                         book.coverUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.book, color: Colors.grey),
+                        errorBuilder: (_, __, ___) =>
+                            const Icon(Icons.book, color: Colors.grey),
                       ),
                     )
                   : const Icon(Icons.book, color: Colors.grey),
             ),
             SizedBox(width: 16.w),
-            
+
             // Details
             Expanded(
               child: Column(
@@ -67,18 +69,14 @@ class BookListTile extends StatelessWidget {
                       Expanded(
                         child: Text(
                           book.title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
+                                  ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      Icon(
-                        Icons.bookmark_outline_rounded,
-                        color: AppColors.textSecondary,
-                        size: 24.w,
                       ),
                     ],
                   ),
@@ -94,11 +92,7 @@ class BookListTile extends StatelessWidget {
                   SizedBox(height: 8.h),
                   Row(
                     children: [
-                      Icon(Icons.star, color: Colors.amber, size: 14.w),
-                      Icon(Icons.star, color: Colors.amber, size: 14.w),
-                      Icon(Icons.star, color: Colors.amber, size: 14.w),
-                      Icon(Icons.star, color: Colors.amber, size: 14.w),
-                      Icon(Icons.star_half, color: Colors.amber, size: 14.w),
+                      StarRatingWidget(rating: book.ratings, size: 14.0),
                       SizedBox(width: 4.w),
                       Text(
                         book.ratings.toString(),

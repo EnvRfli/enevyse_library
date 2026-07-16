@@ -64,6 +64,18 @@ func (r *transactionRepository) FindByID(id uuid.UUID) (*domain.Transaction, err
 	return &transaction, nil
 }
 
+func (r *transactionRepository) FindByBorrowID(borrowID string) (*domain.Transaction, error) {
+	var transaction domain.Transaction
+	result := r.db.Where("borrow_id = ?", borrowID).First(&transaction)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, result.Error
+	}
+	return &transaction, nil
+}
+
 func (r *transactionRepository) GetTodayCount() (int64, error) {
 	var count int64
 	today := time.Now().Truncate(24 * time.Hour)

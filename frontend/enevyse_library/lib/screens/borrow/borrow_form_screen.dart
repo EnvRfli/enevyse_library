@@ -160,7 +160,7 @@ class _BorrowFormView extends StatelessWidget {
               // Borrow Date
               _buildLabel('borrow_date'.tr()),
               _buildReadOnlyField(dateFormat.format(now),
-                  icon: Icons.calendar_today_rounded),
+                  icon: Icons.calendar_today_rounded, isGrey: true),
               SizedBox(height: 20.h),
 
               // Return Date
@@ -249,38 +249,41 @@ class _BorrowFormView extends StatelessWidget {
               ),
               SizedBox(height: 32.h),
 
-              // Submit Button
-              if (logic.errorMessage != null)
-                Padding(
-                  padding: EdgeInsets.only(bottom: 16.h),
-                  child: Text(
-                    logic.errorMessage!,
-                    style: TextStyle(color: Colors.red, fontSize: 12.sp),
-                  ),
-                ),
 
               SizedBox(
                 width: double.infinity,
                 height: 56.h,
                 child: ElevatedButton(
-                  onPressed: logic.isLoading
+                  onPressed: logic.isLoading || logic.purpose.isEmpty || !logic.agreedToTerms
                       ? null
                       : () async {
-                          final transactionId =
+                          final borrowId =
                               await logic.submitBorrowRequest(bookId, context);
-                          if (transactionId != null) {
+                          if (borrowId != null) {
                             if (context.mounted) {
-                              context.go('/borrow-success', extra: {
-                                'transactionId': transactionId,
+                              context.pushReplacement('/borrow-success', extra: {
+                                'borrowId': borrowId,
                                 'bookTitle': book.title,
                                 'deadline': returnDate,
+                                'isFromBorrowing': true,
                               });
+                            }
+                          } else {
+                            if (context.mounted && logic.errorMessage != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(logic.errorMessage!),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
                             }
                           }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF8B9CEB), // Soft Indigo
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey.shade300,
+                    disabledForegroundColor: Colors.grey.shade500,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28.r),

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../repository/book_repository.dart';
+import '../../../models/book.dart';
 
 class EditBookLogic extends ChangeNotifier {
   final BookRepository _bookRepository;
@@ -22,6 +23,57 @@ class EditBookLogic extends ChangeNotifier {
 
   File? coverImage;
   String? currentCoverUrl;
+  Book? _loadedBook;
+
+  DateTime? publishedDate;
+  List<String> selectedCategories = [];
+  List<String> selectedGenres = [];
+  String? selectedLanguage;
+
+  static const List<String> availableCategories = [
+    'Programming', 'Technology', 'Fantasy', 'Novel', 'Business', 'Self-Help', 'History', 'Biography'
+  ];
+  static const List<String> availableGenres = [
+    'Science Fiction', 'Fantasy', 'Mystery', 'Thriller', 'Romance', 'Horror',
+    'Adventure', 'Historical', 'Drama', 'Comedy', 'Detective', 'Mythology',
+    'Dystopian', 'Magical Realism', 'Gothic'
+  ];
+  static const List<String> availableLanguages = [
+    'English', 'Indonesian', 'Spanish', 'Japanese', 'Korean', 'Mandarin'
+  ];
+
+  bool get isNovelSelected => selectedCategories.contains('Novel');
+
+  void toggleCategory(String category) {
+    if (selectedCategories.contains(category)) {
+      selectedCategories.remove(category);
+      if (category == 'Novel') {
+        selectedGenres.clear();
+      }
+    } else {
+      selectedCategories.add(category);
+    }
+    notifyListeners();
+  }
+
+  void toggleGenre(String genre) {
+    if (selectedGenres.contains(genre)) {
+      selectedGenres.remove(genre);
+    } else {
+      selectedGenres.add(genre);
+    }
+    notifyListeners();
+  }
+
+  void setLanguage(String? language) {
+    selectedLanguage = language;
+    notifyListeners();
+  }
+
+  void setPublishedDate(DateTime date) {
+    publishedDate = date;
+    notifyListeners();
+  }
 
   bool get hasLoadedBook => titleController.text.isNotEmpty;
 
@@ -36,6 +88,7 @@ class EditBookLogic extends ChangeNotifier {
     try {
       final book = await _bookRepository.getBook(id);
       if (book != null) {
+        _loadedBook = book;
         titleController.text = book.title;
         authorController.text = book.author;
         publisherController.text = book.publisher;
@@ -43,6 +96,12 @@ class EditBookLogic extends ChangeNotifier {
         pagesController.text = book.totalPages.toString();
         totalCopiesController.text = book.totalCopies.toString();
         currentCoverUrl = book.coverUrl;
+        
+        publishedDate = book.published;
+        selectedCategories = List.from(book.categories);
+        selectedGenres = List.from(book.genres);
+        selectedLanguage = book.language;
+
         successMessage = 'Book loaded successfully';
       } else {
         errorMessage = 'Book not found';
@@ -84,7 +143,13 @@ class EditBookLogic extends ChangeNotifier {
         'synopsis': synopsisController.text,
         'total_pages': int.tryParse(pagesController.text) ?? 0,
         'total_copies': int.tryParse(totalCopiesController.text) ?? 1,
-        'available_copies': int.tryParse(totalCopiesController.text) ?? 1,
+        'available_copies': _loadedBook?.availableCopies ?? 1,
+        'published': publishedDate?.toIso8601String() ?? _loadedBook?.published?.toIso8601String(),
+        'categories': selectedCategories,
+        'genres': selectedGenres,
+        'language': selectedLanguage ?? _loadedBook?.language ?? '',
+        'cover_url': _loadedBook?.coverUrl,
+        'created_at': _loadedBook?.createdAt?.toIso8601String(),
       };
 
       final success = await _bookRepository.updateBook(idController.text, bookData);

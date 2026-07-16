@@ -61,7 +61,10 @@ func main() {
 	deliveryHTTP.NewUserHandler(app, userUC, userRepo)
 
 	// Jalankan server
-	port := os.Getenv("APP_PORT")
+	port := os.Getenv("PORT") // Default dari Render.com
+	if port == "" {
+		port = os.Getenv("APP_PORT")
+	}
 	if port == "" {
 		port = "3001"
 	}

@@ -8,11 +8,25 @@ import '../../../providers/auth_provider.dart';
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
 
+  String getGreetingKey() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'good_morning';
+    } else if (hour < 15) {
+      return 'good_afternoon';
+    } else if (hour < 18) {
+      return 'good_evening';
+    } else {
+      return 'good_night';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final userName = authProvider.currentUser?.name ?? 'User';
-    final initial = userName.isNotEmpty ? userName[0].toUpperCase() : 'U';
+    final user = authProvider.currentUser;
+    final userName = user?.name ?? 'User';
+    final profilePictureUrl = user?.profilePictureUrl ?? '';
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
@@ -25,7 +39,7 @@ class HomeHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'good_morning'.tr(),
+                getGreetingKey().tr(),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               SizedBox(height: 4.h),
@@ -43,7 +57,7 @@ class HomeHeader extends StatelessWidget {
               ),
             ],
           ),
-          
+
           // Action Buttons (Notification & Avatar)
           Row(
             children: [
@@ -52,35 +66,24 @@ class HomeHeader extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.border),
                 ),
-                child: IconButton(
-                  icon: const Icon(Icons.notifications_none_rounded),
-                  color: AppColors.textPrimary,
-                  iconSize: 20.w,
-                  onPressed: () {},
-                ),
               ),
               SizedBox(width: 12.w),
-              Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF8B9CEB), Color(0xFF63B8D9)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    initial,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.sp,
-                    ),
-                  ),
-                ),
+              CircleAvatar(
+                radius: 20.w,
+                backgroundColor: AppColors.primary.withOpacity(0.1),
+                backgroundImage: profilePictureUrl.isNotEmpty
+                    ? NetworkImage(profilePictureUrl)
+                    : null,
+                child: profilePictureUrl.isEmpty
+                    ? Text(
+                        userName.isNotEmpty ? userName[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : null,
               ),
             ],
           ),

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 import '../../theme/app_colors.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../repository/book_repository.dart';
-import 'logic/edit_book_logic.dart';
+import '../home/widgets/book_card.dart';
+import '../explore/widgets/book_list_tile.dart';
+import 'logic/manage_books_logic.dart';
 
 class EditBookScreen extends StatelessWidget {
   const EditBookScreen({super.key});
@@ -12,275 +16,286 @@ class EditBookScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => EditBookLogic(BookRepository()),
-      child: const _EditBookView(),
+      create: (context) => ManageBooksLogic(BookRepository()),
+      child: const _EditBookListView(),
     );
   }
 }
 
-class _EditBookView extends StatelessWidget {
-  const _EditBookView();
+class _EditBookListView extends StatefulWidget {
+  const _EditBookListView();
+
+  @override
+  State<_EditBookListView> createState() => _EditBookListViewState();
+}
+
+class _EditBookListViewState extends State<_EditBookListView> {
+  bool _isGridView = false;
 
   @override
   Widget build(BuildContext context) {
-    final logic = context.watch<EditBookLogic>();
+    final logic = context.watch<ManageBooksLogic>();
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFDFBF7),
       appBar: AppBar(
-        title: const Text('Edit Book'),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
         elevation: 0,
+        title: Text(
+          'manage_books'.tr(),
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 20.sp,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _isGridView = !_isGridView;
+              });
+            },
+            icon: Icon(
+              _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(width: 8.w),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (logic.errorMessage != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  logic.errorMessage!,
-                  style: TextStyle(color: Colors.red.shade700),
-                ),
-              ),
-            if (logic.successMessage != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  logic.successMessage!,
-                  style: TextStyle(color: Colors.green.shade700),
-                ),
-              ),
-
-            // Search Box
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: logic.idController,
-                    decoration: InputDecoration(
-                      labelText: 'Book ID (UUID)',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16),
-                    ),
+            // Search Bar
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+              child: TextField(
+                controller: logic.searchController,
+                decoration: InputDecoration(
+                  hintText: 'search_book_title'.tr(),
+                  prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16.r),
+                    borderSide: BorderSide.none,
                   ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
                 ),
-                const SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: logic.isLoading
-                      ? null
-                      : () => logic.fetchBook(logic.idController.text),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: logic.isLoading && !logic.hasLoadedBook
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
+                onChanged: (_) => logic.onSearchChanged(),
+              ),
+            ),
+            
+            Expanded(
+              child: logic.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : logic.books.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No books found.',
+                            style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 16.sp),
                           ),
                         )
-                      : const Text('Load',
-                          style: TextStyle(color: Colors.white)),
+                      : _isGridView
+                          ? GridView.builder(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 24.w, vertical: 16.h),
+                              physics: const BouncingScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 16.h,
+                                crossAxisSpacing: 16.w,
+                                childAspectRatio: 0.52,
+                              ),
+                              itemCount: logic.books.length,
+                              itemBuilder: (context, index) {
+                                return _buildBookItem(
+                                    context, logic.books[index], true);
+                              },
+                            )
+                          : ListView.builder(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 24.w, vertical: 16.h),
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: logic.books.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: EdgeInsets.only(bottom: 16.h),
+                                  child: _buildBookItem(
+                                      context, logic.books[index], false),
+                                );
+                              },
+                            ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBookItem(BuildContext context, book, bool isGrid) {
+    return GestureDetector(
+      onTap: () {
+        context.push('/admin/edit-book/form/${book.id}');
+      },
+      child: Stack(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: isGrid
+                ? BookCard(book: book, isGrid: true)
+                : BookListTile(book: book),
+          ),
+          Positioned(
+            top: 12.h,
+            right: isGrid ? 12.w : 24.w,
+            child: Row(
+              children: [
+                _buildActionButton(
+                  icon: Icons.edit,
+                  color: AppColors.primary,
+                  onTap: () {
+                    context.push('/admin/edit-book/form/${book.id}');
+                  },
+                ),
+                SizedBox(width: 6.w),
+                _buildActionButton(
+                  icon: Icons.delete,
+                  color: Colors.red,
+                  onTap: () {
+                    _showDeleteDialog(context, book);
+                  },
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+          ),
+        ],
+      ),
+    );
+  }
 
-            if (logic.hasLoadedBook) ...[
-              const Text(
-                'Edit Details',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-
-              // Cover Image Picker
-              GestureDetector(
-                onTap: () {
-                  _showImageSourceActionSheet(context, logic);
-                },
-                child: Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: logic.coverImage != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.file(
-                            logic.coverImage!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
-                        )
-                      : logic.currentCoverUrl != null &&
-                              logic.currentCoverUrl!.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Image.network(
-                                logic.currentCoverUrl!,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                errorBuilder: (_, __, ___) => const Icon(
-                                    Icons.broken_image,
-                                    size: 50,
-                                    color: Colors.grey),
-                              ),
-                            )
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.add_a_photo,
-                                    size: 40, color: Colors.grey.shade600),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Tap to change cover image',
-                                  style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontSize: 14),
-                                ),
-                              ],
-                            ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              _buildTextField('Title', logic.titleController),
-              const SizedBox(height: 12),
-              _buildTextField('Author', logic.authorController),
-              const SizedBox(height: 12),
-              _buildTextField('Publisher', logic.publisherController),
-              const SizedBox(height: 12),
-              _buildTextField('Total Pages', logic.pagesController,
-                  keyboardType: TextInputType.number),
-              const SizedBox(height: 12),
-              _buildTextField('Total Copies', logic.totalCopiesController,
-                  keyboardType: TextInputType.number),
-              const SizedBox(height: 12),
-              _buildTextField('Synopsis', logic.synopsisController,
-                  maxLines: 5),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: logic.isLoading
-                      ? null
-                      : () async {
-                          final success = await logic.updateBook();
-                          if (success && context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Book updated successfully')),
-                            );
-                            context.pop();
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accentMocca,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: logic.isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Update Book',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                ),
-              ),
-            ],
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(6.w),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.95),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
           ],
         ),
+        child: Icon(icon, color: color, size: 18.w),
       ),
     );
   }
 
-  Widget _buildTextField(
-    String label,
-    TextEditingController controller, {
-    TextInputType? keyboardType,
-    int maxLines = 1,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        alignLabelWithHint: maxLines > 1,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary),
-        ),
-      ),
-    );
-  }
-
-  void _showImageSourceActionSheet(BuildContext context, EditBookLogic logic) {
+  void _showDeleteDialog(BuildContext context, book) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
-      builder: (_) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Photo Library'),
-              onTap: () {
-                Navigator.of(context).pop();
-                logic.pickImage(ImageSource.gallery);
-              },
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(24.w),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Delete Book',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  'ingin menghapus data buku ini?',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 24.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        child: Text(
+                          'Batal',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 16.w),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+                          final logic = context.read<ManageBooksLogic>();
+                          final success = await logic.deleteBook(book.id);
+                          if (success && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('book_successfully_deleted'.tr())),
+                            );
+                          } else if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('failed_delete_book'.tr())),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        child: Text(
+                          'Ya',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Camera'),
-              onTap: () {
-                Navigator.of(context).pop();
-                logic.pickImage(ImageSource.camera);
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

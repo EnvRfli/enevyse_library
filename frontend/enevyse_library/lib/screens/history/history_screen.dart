@@ -40,7 +40,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         .where((t) =>
             t.status == 'PENDING' ||
             t.status == 'APPROVED' ||
-            t.status == 'BORROWED')
+            t.status == 'BORROWING')
         .toList();
     final historyTransactions = allTransactions
         .where((t) =>
@@ -54,23 +54,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Text(
+          'my_borrowing'.tr(),
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 20.sp,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 16.h),
-            // Header
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Text(
-                'my_borrowing'.tr(),
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-              ),
-            ),
-            SizedBox(height: 24.h),
 
             // Tabs
             Padding(

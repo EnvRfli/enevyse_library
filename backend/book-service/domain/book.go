@@ -40,6 +40,8 @@ type BookFilter struct {
 	MinRating float64
 	Language  string
 	SortBy    string
+	Page      int
+	Limit     int
 }
 
 // BookRepository defines the contract for book database operations.

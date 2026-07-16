@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import '../../../widgets/custom_text_field.dart';
@@ -20,7 +20,14 @@ class RegisterForm extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.background,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(40.r)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(36.r)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
         ),
         child: SingleChildScrollView(
           padding: EdgeInsets.only(
@@ -55,7 +62,8 @@ class RegisterForm extends StatelessWidget {
                     if (value == null || value.isEmpty) {
                       return 'email_required'.tr();
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                        .hasMatch(value)) {
                       return 'invalid_email'.tr();
                     }
                     return null;
@@ -80,7 +88,7 @@ class RegisterForm extends StatelessWidget {
                     return null;
                   },
                 ),
-                SizedBox(height: 32.h),
+                SizedBox(height: 28.h),
                 ElevatedButton(
                   onPressed: (!logic.isFormValid || authProvider.isLoading)
                       ? null
@@ -99,7 +107,7 @@ class RegisterForm extends StatelessWidget {
                         )
                       : Text('register'.tr()),
                 ),
-                SizedBox(height: 48.h),
+                SizedBox(height: 32.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

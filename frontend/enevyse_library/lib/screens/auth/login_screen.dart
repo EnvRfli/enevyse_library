@@ -11,16 +11,27 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: SafeArea(
-        bottom: false,
-        child: ChangeNotifierProvider(
-          create: (_) => LoginLogic(),
-          child: const Column(
-            children: [
-              LoginHeader(),
-              LoginForm(),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.headerGradientStart,
+              AppColors.headerGradientEnd,
             ],
+          ),
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: ChangeNotifierProvider(
+            create: (_) => LoginLogic(),
+            child: const Column(
+              children: [
+                LoginHeader(),
+                LoginForm(),
+              ],
+            ),
           ),
         ),
       ),

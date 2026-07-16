@@ -29,6 +29,7 @@ func NewTransactionHandler(app *fiber.App, uc domain.TransactionUsecase) {
 	// Admin-only lifecycle routes
 	txs.Patch("/:id/pickup", middleware.RequireAdmin, handler.PickupBook)
 	txs.Post("/:id/return", middleware.RequireAdmin, handler.ReturnBook)
+	txs.Post("/scan", middleware.RequireAdmin, handler.ProcessScan)
 }
 
 func (h *TransactionHandler) BorrowBook(c *fiber.Ctx) error {
@@ -183,6 +184,33 @@ func (h *TransactionHandler) ReturnBook(c *fiber.Ctx) error {
 	}
 
 	tx, err := h.txUsecase.ReturnBook(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(tx)
+}
+
+func (h *TransactionHandler) ProcessScan(c *fiber.Ctx) error {
+	var req struct {
+		BorrowID string `json:"borrow_id"`
+	}
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	if req.BorrowID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "borrow_id is required",
+		})
+	}
+
+	tx, err := h.txUsecase.ProcessScan(req.BorrowID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),

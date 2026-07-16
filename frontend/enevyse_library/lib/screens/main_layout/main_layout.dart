@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import 'package:go_router/go_router.dart';
-
 import '../../../theme/app_colors.dart';
-import '../../../providers/auth_provider.dart';
 import 'logic/main_layout_logic.dart';
 import '../home/home_screen.dart';
 import '../explore/explore_screen.dart';
 import '../history/history_screen.dart';
+import '../profile/profile_screen.dart';
 
 class MainLayout extends StatelessWidget {
   const MainLayout({super.key});
@@ -36,63 +33,14 @@ class _MainLayoutView extends StatelessWidget {
       const HomeScreen(),
       const ExploreScreen(),
       const HistoryScreen(),
-      Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Profile', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final authProv = Provider.of<AuthProvider>(context, listen: false);
-                  await authProv.logout();
-                  if (context.mounted) {
-                    context.go('/login');
-                  }
-                },
-                icon: const Icon(Icons.logout),
-                label: const Text('Logout'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade100,
-                  foregroundColor: Colors.red.shade900,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      const ProfileScreen(),
     ];
-
-    final authProvider = Provider.of<AuthProvider>(context);
-    final isAdmin = authProvider.currentUser?.role == 'admin';
 
     return Scaffold(
       body: IndexedStack(
         index: logic.currentIndex,
         children: screens,
       ),
-      floatingActionButton: logic.currentIndex == 3 && isAdmin
-          ? Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FloatingActionButton(
-                  heroTag: 'edit-book',
-                  onPressed: () => context.push('/admin/edit-book'),
-                  backgroundColor: AppColors.accentMocca,
-                  child: const Icon(Icons.edit, color: Colors.white),
-                ),
-                const SizedBox(height: 16),
-                FloatingActionButton(
-                  heroTag: 'add-book',
-                  onPressed: () => context.push('/admin/add-book'),
-                  backgroundColor: AppColors.primary,
-                  child: const Icon(Icons.add, color: Colors.white),
-                ),
-              ],
-            )
-          : null,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: logic.currentIndex,
         onTap: logic.setIndex,

@@ -34,31 +34,37 @@ class _ExpandableSynopsisState extends State<ExpandableSynopsis> {
               _isExpanded = !_isExpanded;
             });
           },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.description,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                      height: 1.5,
-                    ),
-                maxLines: _isExpanded ? null : 3,
-                overflow: _isExpanded ? TextOverflow.visible : TextOverflow.fade,
-              ),
-              if (!_isExpanded)
-                Padding(
-                  padding: EdgeInsets.only(top: 4.h),
-                  child: Text(
-                    'read_more'.tr(),
-                    style: TextStyle(
-                      color: const Color(0xFF9E86E1), // Purple accent
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.sp,
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.description,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                  maxLines: _isExpanded ? null : 3,
+                  overflow:
+                      _isExpanded ? TextOverflow.visible : TextOverflow.fade,
+                ),
+                if (!_isExpanded)
+                  Padding(
+                    padding: EdgeInsets.only(top: 4.h),
+                    child: Text(
+                      'read_more'.tr(),
+                      style: TextStyle(
+                        color: const Color(0xFF9E86E1), // Purple accent
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

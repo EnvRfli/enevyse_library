@@ -3,37 +3,47 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class LoginHeader extends StatelessWidget {
-  const LoginHeader({super.key});
+  /// Optional custom subtitle. Falls back to 'sign_in_subtitle'.tr() if null.
+  final String? subtitle;
+  const LoginHeader({super.key, this.subtitle});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 40.h),
-      child: Column(
-        children: [
-          Icon(
-            Icons.local_florist_rounded, // Similar to the tree/plant logo in the image
-            size: 64.w,
-            color: Colors.white,
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            'welcome'.tr(),
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            'sign_in_subtitle'.tr(),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
-                ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 32.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Vector logo
+            Image.asset(
+              'assets/images/Vector.png',
+              width: 72.w,
+              height: 72.w,
+              color: Colors.white,
+            ),
+            SizedBox(height: 20.h),
+            Text(
+              'welcome'.tr(),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 26.sp,
+                letterSpacing: -0.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 10.h),
+            Text(
+              subtitle ?? 'sign_in_subtitle'.tr(),
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.85),
+                fontSize: 15.sp,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

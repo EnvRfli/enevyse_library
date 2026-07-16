@@ -30,7 +30,7 @@ class _AddBookView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Add New Book', style: Theme.of(context).textTheme.titleLarge),
+        title: Text('add_book'.tr(), style: Theme.of(context).textTheme.titleLarge),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -69,7 +69,7 @@ class _AddBookView extends StatelessWidget {
                             Icon(Icons.add_a_photo, size: 40.w, color: Colors.grey.shade600),
                             SizedBox(height: 8.h),
                             Text(
-                              'Tap to add cover image',
+                              'tap_to_add_cover_image'.tr(),
                               style: TextStyle(color: Colors.grey.shade600, fontSize: 14.sp),
                             ),
                           ],
@@ -81,7 +81,7 @@ class _AddBookView extends StatelessWidget {
               // Title
               CustomTextField(
                 controller: logic.titleController,
-                hintText: 'Title',
+                hintText: 'title'.tr(),
                 prefixIcon: Icons.book,
                 validator: (value) => value == null || value.isEmpty ? 'Title is required' : null,
               ),
@@ -90,7 +90,7 @@ class _AddBookView extends StatelessWidget {
               // Author
               CustomTextField(
                 controller: logic.authorController,
-                hintText: 'Author',
+                hintText: 'author'.tr(),
                 prefixIcon: Icons.person,
                 validator: (value) => value == null || value.isEmpty ? 'Author is required' : null,
               ),
@@ -99,7 +99,7 @@ class _AddBookView extends StatelessWidget {
               // Publisher
               CustomTextField(
                 controller: logic.publisherController,
-                hintText: 'Publisher',
+                hintText: 'publisher'.tr(),
                 prefixIcon: Icons.business,
               ),
               SizedBox(height: 16.h),
@@ -137,7 +137,7 @@ class _AddBookView extends StatelessWidget {
                       Text(
                         logic.publishedDate != null
                             ? DateFormat('MMM dd, yyyy').format(logic.publishedDate!)
-                            : 'Select Published Date',
+                            : 'select_published_date'.tr(),
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               color: logic.publishedDate != null ? AppColors.textPrimary : Colors.grey.shade600,
                             ),
@@ -151,7 +151,7 @@ class _AddBookView extends StatelessWidget {
               // Language Dropdown
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
-                  labelText: 'Language',
+                  labelText: 'language'.tr(),
                   prefixIcon: const Icon(Icons.language),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r)),
                 ),
@@ -164,7 +164,7 @@ class _AddBookView extends StatelessWidget {
               SizedBox(height: 16.h),
 
               // Categories Multi-select
-              Text('Categories', style: Theme.of(context).textTheme.titleMedium),
+              Text('categories'.tr(), style: Theme.of(context).textTheme.titleMedium),
               SizedBox(height: 8.h),
               Wrap(
                 spacing: 8.w,
@@ -172,7 +172,7 @@ class _AddBookView extends StatelessWidget {
                 children: AdminBookLogic.availableCategories.map((category) {
                   final isSelected = logic.selectedCategories.contains(category);
                   return FilterChip(
-                    label: Text(category),
+                    label: Text('cat_${category.toLowerCase()}'.tr()),
                     selected: isSelected,
                     onSelected: (_) => logic.toggleCategory(category),
                     selectedColor: AppColors.primary.withValues(alpha: 0.2),
@@ -184,7 +184,7 @@ class _AddBookView extends StatelessWidget {
 
               if (logic.isNovelSelected) ...[
                 // Genres Multi-select
-                Text('Genres', style: Theme.of(context).textTheme.titleMedium),
+                Text('genres'.tr(), style: Theme.of(context).textTheme.titleMedium),
                 SizedBox(height: 8.h),
                 Wrap(
                   spacing: 8.w,
@@ -192,7 +192,7 @@ class _AddBookView extends StatelessWidget {
                   children: AdminBookLogic.availableGenres.map((genre) {
                     final isSelected = logic.selectedGenres.contains(genre);
                     return FilterChip(
-                      label: Text(genre),
+                      label: Text('gen_${genre.toLowerCase()}'.tr()),
                       selected: isSelected,
                       onSelected: (_) => logic.toggleGenre(genre),
                       selectedColor: AppColors.primary.withValues(alpha: 0.2),
@@ -206,7 +206,7 @@ class _AddBookView extends StatelessWidget {
               // Total Copies
               CustomTextField(
                 controller: logic.totalCopiesController,
-                hintText: 'Total Copies',
+                hintText: 'total_copies'.tr(),
                 prefixIcon: Icons.library_books,
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Required';
@@ -219,7 +219,7 @@ class _AddBookView extends StatelessWidget {
               // Total Pages
               CustomTextField(
                 controller: logic.totalPagesController,
-                hintText: 'Total Pages',
+                hintText: 'total_pages'.tr(),
                 prefixIcon: Icons.pages,
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Required';
@@ -232,7 +232,7 @@ class _AddBookView extends StatelessWidget {
               // Synopsis
               CustomTextField(
                 controller: logic.synopsisController,
-                hintText: 'Synopsis',
+                hintText: 'synopsis'.tr(),
                 prefixIcon: Icons.description,
               ),
               SizedBox(height: 32.h),
@@ -245,7 +245,7 @@ class _AddBookView extends StatelessWidget {
                         final success = await logic.addBook(context);
                         if (success && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Book successfully added!')),
+                            SnackBar(content: Text('book_successfully_added'.tr())),
                           );
                           context.pop();
                         }
@@ -265,7 +265,10 @@ class _AddBookView extends StatelessWidget {
                         width: 20.h,
                         child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
-                    : Text('Add Book', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                    : Text(
+                        'add_book'.tr(),
+                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                      ),
               ),
             ],
           ),
@@ -285,7 +288,7 @@ class _AddBookView extends StatelessWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Photo Library'),
+              title: Text('choose_from_gallery'.tr()),
               onTap: () {
                 Navigator.of(context).pop();
                 logic.pickImage(ImageSource.gallery);
@@ -293,7 +296,7 @@ class _AddBookView extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.photo_camera),
-              title: const Text('Camera'),
+              title: Text('take_photo'.tr()),
               onTap: () {
                 Navigator.of(context).pop();
                 logic.pickImage(ImageSource.camera);

@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import '../../../models/book.dart';
 import '../../../theme/app_colors.dart';
+import '../../../widgets/star_rating_widget.dart';
 import '../../book_detail/function/build_fallback_cover.dart';
 
 class BookCard extends StatelessWidget {
@@ -78,11 +79,7 @@ class BookCard extends StatelessWidget {
           Row(
             children: [
               // Stars
-              Icon(Icons.star, color: Colors.amber, size: 14.w),
-              Icon(Icons.star, color: Colors.amber, size: 14.w),
-              Icon(Icons.star, color: Colors.amber, size: 14.w),
-              Icon(Icons.star, color: Colors.amber, size: 14.w),
-              Icon(Icons.star_half, color: Colors.amber, size: 14.w),
+              StarRatingWidget(rating: book.ratings, size: 14.0),
               SizedBox(width: 4.w),
               Text(
                 book.ratings.toStringAsFixed(1),

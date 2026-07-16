@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../repository/auth_repository.dart';
 import '../models/user_model.dart';
@@ -82,6 +83,51 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     await _authRepository.logout();
+    _currentUser = null;
     notifyListeners();
+  }
+
+
+  Future<bool> updateProfile(Map<String, dynamic> data) async {
+    _setLoading(true);
+    _errorMessage = null;
+
+    try {
+      final updatedUser = await _authRepository.updateProfile(data);
+      if (updatedUser != null) {
+        _currentUser = updatedUser;
+        _setLoading(false);
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = 'update_profile_failed';
+        _setLoading(false);
+        return false;
+      }
+    } catch (e) {
+      _setLoading(false);
+      _errorMessage = 'error_occurred';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<String?> uploadProfilePicture(File image) async {
+    _setLoading(true);
+    _errorMessage = null;
+
+    try {
+      final url = await _authRepository.uploadProfilePicture(image);
+      _setLoading(false);
+      if (url == null) {
+        _errorMessage = 'upload_failed';
+      }
+      return url;
+    } catch (e) {
+      _setLoading(false);
+      _errorMessage = 'error_occurred';
+      notifyListeners();
+      return null;
+    }
   }
 }

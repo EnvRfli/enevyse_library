@@ -6,6 +6,7 @@ class CustomTextField extends StatefulWidget {
   final String hintText;
   final IconData prefixIcon;
   final bool isPassword;
+  final bool readOnly;
   final String? Function(String?)? validator;
 
   const CustomTextField({
@@ -14,6 +15,7 @@ class CustomTextField extends StatefulWidget {
     required this.hintText,
     required this.prefixIcon,
     this.isPassword = false,
+    this.readOnly = false,
     this.validator,
   });
 
@@ -35,6 +37,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return TextFormField(
       controller: widget.controller,
       obscureText: _obscureText,
+      readOnly: widget.readOnly,
       validator: widget.validator,
       style: Theme.of(context).textTheme.bodyLarge,
       decoration: InputDecoration(

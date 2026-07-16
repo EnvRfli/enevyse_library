@@ -1,10 +1,11 @@
 package http
 
 import (
-	"io"
-	"strconv"
 	"book-service/domain"
 	"book-service/middleware"
+	"io"
+	"log"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -26,7 +27,7 @@ func NewBookHandler(app *fiber.App, uc domain.BookUsecase) {
 	// Protected routes (require auth)
 	// Must be defined before /:id to avoid treating "favorites" as an ID
 	books.Get("/favorites", middleware.RequireAuth, handler.GetUserFavorites)
-	
+
 	books.Get("/:id", handler.GetBookByID)
 	books.Post("/:id/favorite", middleware.RequireAuth, handler.ToggleFavorite)
 
@@ -43,12 +44,27 @@ func (h *BookHandler) GetAllBooks(c *fiber.Ctx) error {
 	category := c.Query("category")
 	language := c.Query("language")
 	sortBy := c.Query("sort_by")
-	
+
 	minRatingStr := c.Query("min_rating")
 	var minRating float64
 	if minRatingStr != "" {
 		if val, err := strconv.ParseFloat(minRatingStr, 64); err == nil {
 			minRating = val
+		}
+	}
+
+	pageStr := c.Query("page")
+	limitStr := c.Query("limit")
+
+	var page, limit int
+	if pageStr != "" {
+		if val, err := strconv.Atoi(pageStr); err == nil {
+			page = val
+		}
+	}
+	if limitStr != "" {
+		if val, err := strconv.Atoi(limitStr); err == nil {
+			limit = val
 		}
 	}
 
@@ -58,10 +74,13 @@ func (h *BookHandler) GetAllBooks(c *fiber.Ctx) error {
 		MinRating: minRating,
 		Language:  language,
 		SortBy:    sortBy,
+		Page:      page,
+		Limit:     limit,
 	}
 
 	books, err := h.bookUsecase.GetAllBooks(filter)
 	if err != nil {
+		log.Printf("Error fetching books: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to fetch books",
 		})

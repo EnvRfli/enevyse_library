@@ -44,6 +44,7 @@ type TransactionRepository interface {
 	UpdateStatus(id uuid.UUID, status string, timestampField *time.Time) error
 	FindByUserID(userID uint) ([]Transaction, error)
 	FindByID(id uuid.UUID) (*Transaction, error)
+	FindByBorrowID(borrowID string) (*Transaction, error)
 	GetTodayCount() (int64, error)
 	CountActiveTransactions(userID uint) (int64, error)
 	Update(tx *Transaction) error
@@ -57,4 +58,5 @@ type TransactionUsecase interface {
 	PickupBook(id uuid.UUID) (*Transaction, error)
 	ExtendBorrow(userID uint, id uuid.UUID) (*Transaction, error)
 	ReturnBook(id uuid.UUID) (*Transaction, error)
+	ProcessScan(borrowID string) (*Transaction, error)
 }

@@ -1,11 +1,15 @@
 package usecase
 
 import (
+	"bytes"
 	"errors"
-	"identity-service/domain"
 	"fmt"
+	"identity-service/domain"
+	"io"
 	"math/rand"
+	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -140,6 +144,65 @@ func (u *userUsecase) UpdateMembershipStatus(userID uint, status string) (*domai
 	}
 
 	return user, nil
+}
+
+func (u *userUsecase) UploadProfilePicture(userID uint, fileData []byte, fileName string, contentType string) (string, error) {
+	user, err := u.userRepo.FindByID(userID)
+	if err != nil {
+		return "", err
+	}
+	if user == nil {
+		return "", errors.New("user not found")
+	}
+
+	supabaseURL := os.Getenv("SUPABASE_URL")
+	supabaseKey := os.Getenv("SUPABASE_KEY")
+	supabaseBucket := os.Getenv("SUPABASE_BUCKET")
+
+	if supabaseURL == "" || supabaseKey == "" || supabaseBucket == "" {
+		return "", errors.New("supabase credentials are not configured")
+	}
+
+	ext := filepath.Ext(fileName)
+	if ext == "" {
+		ext = ".jpg"
+	}
+	// Object name includes userID
+	objectName := fmt.Sprintf("%d%s", userID, ext)
+
+	uploadURL := fmt.Sprintf("%s/storage/v1/object/%s/%s", supabaseURL, supabaseBucket, objectName)
+
+	req, err := http.NewRequest("POST", uploadURL, bytes.NewReader(fileData))
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("Content-Type", contentType)
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to upload image: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("supabase upload failed with status %d: %s", resp.StatusCode, string(bodyBytes))
+	}
+
+	// Construct public URL. Add timestamp to break cache
+	publicURL := fmt.Sprintf("%s/storage/v1/object/public/%s/%s?t=%d", supabaseURL, supabaseBucket, objectName, time.Now().Unix())
+
+	user.ProfilePictureURL = publicURL
+	user.UpdatedAt = time.Now()
+
+	if err := u.userRepo.Update(user); err != nil {
+		return "", fmt.Errorf("failed to update user profile in database: %w", err)
+	}
+
+	return publicURL, nil
 }
 
 // generateJWT membuat JWT token untuk pengguna yang terautentikasi.

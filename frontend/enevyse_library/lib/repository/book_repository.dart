@@ -40,17 +40,33 @@ class BookRepository {
     }
   }
 
-  Future<List<Book>?> getAllBooks({String? title, String? category, String? language, double? minRating, String? sortBy}) async {
+  Future<List<Book>?> getAllBooks({
+    String? title,
+    String? category,
+    String? language,
+    double? minRating,
+    String? sortBy,
+    int? page,
+    int? limit,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (title != null && title.isNotEmpty) queryParams['title'] = title;
-      if (category != null && category.isNotEmpty && category != 'All') queryParams['category'] = category;
-      if (language != null && language.isNotEmpty) queryParams['language'] = language;
+      if (category != null && category.isNotEmpty && category != 'All') {
+        queryParams['category'] = category;
+      }
+      if (language != null && language.isNotEmpty) {
+        queryParams['language'] = language;
+      }
       if (minRating != null) queryParams['min_rating'] = minRating.toString();
       if (sortBy != null && sortBy.isNotEmpty) queryParams['sort_by'] = sortBy;
+      if (page != null) queryParams['page'] = page.toString();
+      if (limit != null) queryParams['limit'] = limit.toString();
 
-      final uri = Uri(path: '/api/v1/books', queryParameters: queryParams.isNotEmpty ? queryParams : null);
-      
+      final uri = Uri(
+          path: '/api/v1/books',
+          queryParameters: queryParams.isNotEmpty ? queryParams : null);
+
       final response = await _apiClient.get(
         Microservice.book,
         uri.toString(),
@@ -96,6 +112,53 @@ class BookRepository {
         return true;
       }
       return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> toggleFavorite(String bookId) async {
+    try {
+      final response = await _apiClient.post(
+        Microservice.book,
+        '/api/v1/books/$bookId/favorite',
+        requiresAuth: true,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        return data['is_favorite'] ?? false;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<List<Book>?> getFavorites() async {
+    try {
+      final response = await _apiClient.get(
+        Microservice.book,
+        '/api/v1/books/favorites',
+        requiresAuth: true,
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((json) => Book.fromJson(json)).toList();
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<bool> deleteBook(String id) async {
+    try {
+      final response = await _apiClient.delete(
+        Microservice.book,
+        '/api/v1/books/$id',
+        requiresAuth: true,
+      );
+      return response.statusCode == 200 || response.statusCode == 204;
     } catch (e) {
       return false;
     }

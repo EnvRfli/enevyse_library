@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'logic/register_logic.dart';
 import 'widgets/register_form.dart';
-import 'widgets/login_header.dart'; // We can reuse the header style
+import 'widgets/login_header.dart';
 import '../../theme/app_colors.dart';
 
 class RegisterScreen extends StatelessWidget {
@@ -23,14 +24,25 @@ class _RegisterScreenView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: const [
-            LoginHeader(), // Using the same header style
-            RegisterForm(),
-          ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.headerGradientStart,
+              AppColors.headerGradientEnd,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              LoginHeader(subtitle: 'register_subtitle'.tr()),
+              const RegisterForm(),
+            ],
+          ),
         ),
       ),
     );

@@ -27,11 +27,18 @@ class TransactionRepository {
             return Transaction.fromJson(data);
           }
         }
+      } else {
+        final data = jsonDecode(response.body);
+        final message = data['error'] ?? data['message'] ?? 'Failed to borrow book';
+        throw Exception(message);
       }
       return null;
     } catch (e) {
+      if (e is Exception && e.toString().startsWith('Exception:')) {
+        rethrow;
+      }
       print('Error in borrowBook: $e');
-      return null;
+      throw Exception('Connection error');
     }
   }
 
@@ -79,6 +86,25 @@ class TransactionRepository {
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<Map<String, dynamic>> scanBorrow(String borrowId) async {
+    final response = await _apiClient.post(
+      Microservice.transaction,
+      '/api/v1/transactions/scan',
+      body: {'borrow_id': borrowId},
+    );
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode == 200) {
+      return {'success': true, 'status': data['status']};
+    } else {
+      return {
+        'success': false,
+        'error': data['error'] ?? data['message'] ?? 'failed_to_process_transaction',
+      };
     }
   }
 }

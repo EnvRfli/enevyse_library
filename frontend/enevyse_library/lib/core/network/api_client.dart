@@ -10,7 +10,7 @@ enum Microservice {
 
 class ApiClient {
   static const String _localhost =
-      'http://10.133.250.7'; // Diubah untuk Emulator Mumu Player
+      'http://10.133.4.7'; // Diubah untuk Emulator Mumu Player
 
   static const String identityBaseUrl = '$_localhost:3001';
   static const String bookBaseUrl = '$_localhost:8002';
@@ -55,7 +55,7 @@ class ApiClient {
   }
 
   Future<http.Response> post(Microservice service, String endpoint,
-      {required Map<String, dynamic> body, bool requiresAuth = true}) async {
+      {Map<String, dynamic>? body, bool requiresAuth = true}) async {
     final baseUrl = _getBaseUrl(service);
     final url = Uri.parse('$baseUrl$endpoint');
     final headers = await _getHeaders(requiresAuth: requiresAuth);

@@ -22,7 +22,14 @@ class LoginForm extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.background,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(40.r)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(36.r)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
         ),
         child: SingleChildScrollView(
           padding: EdgeInsets.only(
@@ -71,22 +78,7 @@ class LoginForm extends StatelessWidget {
                     return null;
                   },
                 ),
-                SizedBox(height: 8.h),
-
-                // Forgot Password (Right Aligned)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'forgot_password'.tr(),
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: AppColors.primary,
-                          ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 24.h),
+                SizedBox(height: 28.h),
 
                 // Login Button
                 ElevatedButton(
@@ -108,7 +100,7 @@ class LoginForm extends StatelessWidget {
                       : Text('login'.tr()),
                 ),
 
-                SizedBox(height: 48.h),
+                SizedBox(height: 16.h),
 
                 // Register
                 Row(

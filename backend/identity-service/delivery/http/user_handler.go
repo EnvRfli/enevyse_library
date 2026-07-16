@@ -27,6 +27,7 @@ func NewUserHandler(app *fiber.App, uc domain.UserUsecase, repo domain.UserRepos
 	// --- Protected routes (membutuhkan JWT yang valid) ---
 	api.Get("/me", middleware.RequireAuth, handler.GetMe)
 	api.Put("/me", middleware.RequireAuth, handler.UpdateProfile)
+	api.Post("/me/profile-picture", middleware.RequireAuth, handler.UploadProfilePicture)
 
 	// --- Admin-only routes (membutuhkan JWT valid + role "admin") ---
 	// Contoh chaining: RequireAuth → RequireAdmin → handler
@@ -150,15 +151,16 @@ func (h *UserHandler) GetMe(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"user_id":             user.ID,
-		"member_id":           user.MemberID,
-		"name":                user.Name,
-		"email":               user.Email,
-		"role":                user.Role,
-		"phone":               user.Phone,
-		"address":             user.Address,
-		"profile_picture_url": user.ProfilePictureURL,
-		"membership_status":   user.MembershipStatus,
+		"user_id":              user.ID,
+		"member_id":            user.MemberID,
+		"name":                 user.Name,
+		"email":                user.Email,
+		"role":                 user.Role,
+		"phone":                user.Phone,
+		"address":              user.Address,
+		"profile_picture_url":  user.ProfilePictureURL,
+		"membership_status":    user.MembershipStatus,
+		"preferred_categories": user.PreferredCategories,
 	})
 }
 
@@ -200,6 +202,70 @@ func (h *UserHandler) UpdateProfile(c *fiber.Ctx) error {
 	user.Password = ""
 
 	return c.Status(fiber.StatusOK).JSON(user)
+}
+
+// UploadProfilePicture godoc
+// @Summary      Upload foto profil
+// @Description  Mengunggah foto profil pengguna saat ini ke Supabase
+// @Tags         user
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     BearerAuth
+// @Param        profile_picture  formData  file  true  "File gambar foto profil"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /me/profile-picture [post]
+func (h *UserHandler) UploadProfilePicture(c *fiber.Ctx) error {
+	userID, ok := c.Locals("user_id").(uint)
+	if !ok || userID == 0 {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Unauthorized",
+		})
+	}
+
+	file, err := c.FormFile("profile_picture")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Image file is required",
+		})
+	}
+
+	// Read file content
+	fileContent, err := file.Open()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to open image file",
+		})
+	}
+	defer fileContent.Close()
+
+	// Convert to byte slice
+	buffer := make([]byte, file.Size)
+	if _, err := fileContent.Read(buffer); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to read image file",
+		})
+	}
+
+	// Determine Content-Type
+	contentType := file.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "image/jpeg"
+	}
+
+	publicURL, err := h.userUsecase.UploadProfilePicture(userID, buffer, file.Filename, contentType)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message":   "Profile picture uploaded successfully",
+		"cover_url": publicURL,
+	})
 }
 
 // UpdateMembership godoc

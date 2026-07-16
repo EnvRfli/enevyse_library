@@ -7,6 +7,10 @@ class AppColors {
   // Primary Color: Navy Blue (for primary buttons and active states)
   static const Color primary = Color(0xFF0A2463);
   
+  // Auth Header Gradient: Sky Blue
+  static const Color headerGradientStart = Color(0xFF6BB8F0);
+  static const Color headerGradientEnd = Color(0xFF4A9FE0);
+  
   // Accent Colors: Mocca, Terracotta, and muted soft tones
   static const Color accentMocca = Color(0xFFC0A080);
   static const Color accentTerracotta = Color(0xFFE07A5F);

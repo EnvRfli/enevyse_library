@@ -72,7 +72,7 @@ class BorrowLogic extends ChangeNotifier {
       if (transaction != null) {
         _isLoading = false;
         notifyListeners();
-        return transaction.id;
+        return transaction.borrowId;
       } else {
         _errorMessage =
             transactionProvider.errorMessage ?? 'error_unknown'.tr();

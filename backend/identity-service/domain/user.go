@@ -73,5 +73,6 @@ type UserUsecase interface {
 	Register(req *RegisterRequest) (*AuthResponse, error)
 	Login(req *LoginRequest) (*AuthResponse, error)
 	UpdateProfile(userID uint, req *UpdateProfileRequest) (*User, error)
+	UploadProfilePicture(userID uint, fileData []byte, fileName string, contentType string) (string, error)
 	UpdateMembershipStatus(userID uint, status string) (*User, error)
 }

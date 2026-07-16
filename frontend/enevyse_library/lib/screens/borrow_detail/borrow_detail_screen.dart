@@ -62,19 +62,20 @@ class _BorrowDetailScreenState extends State<BorrowDetailScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Icon(Icons.arrow_back_ios_new_rounded, size: 16.w, color: AppColors.textPrimary),
-          ),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: AppColors.textPrimary),
           onPressed: () => context.pop(),
+        ),
+        title: Text(
+          'borrow_status'.tr(),
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 20.sp,
+          ),
         ),
       ),
       body: SafeArea(
@@ -94,7 +95,8 @@ class _BorrowDetailScreenState extends State<BorrowDetailScreen> {
                     decoration: BoxDecoration(
                       color: Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(12.r),
-                      image: transaction.book?.coverUrl != null && transaction.book!.coverUrl!.isNotEmpty
+                      image: transaction.book?.coverUrl != null &&
+                              transaction.book!.coverUrl!.isNotEmpty
                           ? DecorationImage(
                               image: NetworkImage(transaction.book!.coverUrl!),
                               fit: BoxFit.cover,
@@ -118,11 +120,12 @@ class _BorrowDetailScreenState extends State<BorrowDetailScreen> {
                         SizedBox(height: 4.h),
                         Text(
                           transaction.book?.author ?? 'Unknown Author',
-                          style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp),
+                          style: TextStyle(
+                              color: AppColors.textSecondary, fontSize: 14.sp),
                         ),
                         SizedBox(height: 8.h),
                         Text(
-                          'BORROW ID · #${transaction.id}',
+                          '${'borrow_id'.tr().toUpperCase()} · #${transaction.borrowId}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 12.sp,
@@ -146,8 +149,10 @@ class _BorrowDetailScreenState extends State<BorrowDetailScreen> {
                 crossAxisSpacing: 12.w,
                 mainAxisSpacing: 12.h,
                 children: [
-                  _buildInfoCard('borrow_date'.tr(), dateFormat.format(transaction.borrowDate)),
-                  _buildInfoCard('due_date'.tr(), dateFormat.format(transaction.dueDate)),
+                  _buildInfoCard('borrow_date'.tr(),
+                      dateFormat.format(transaction.borrowDate)),
+                  _buildInfoCard(
+                      'due_date'.tr(), dateFormat.format(transaction.dueDate)),
                   _buildInfoCard('pickup'.tr(), transaction.pickupLocation),
                   _buildInfoCard(
                     'status'.tr(),
@@ -183,7 +188,7 @@ class _BorrowDetailScreenState extends State<BorrowDetailScreen> {
                     ],
                   ),
                   child: QrImageView(
-                    data: transaction.id,
+                    data: transaction.borrowId,
                     version: QrVersions.auto,
                     size: 140.w,
                     eyeStyle: const QrEyeStyle(
@@ -205,61 +210,74 @@ class _BorrowDetailScreenState extends State<BorrowDetailScreen> {
           ),
         ),
       ),
-      bottomSheet: Container(
-        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 56.h,
-                  child: OutlinedButton(
-                    onPressed: () {}, // Handled by admin in real app
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textPrimary,
-                      side: BorderSide(color: AppColors.border),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
-                    ),
-                    child: Text(
-                      'extend_borrowing'.tr(),
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
-                    ),
+      bottomSheet: (transaction.status == 'BORROWING' ||
+              transaction.status == 'APPROVED' ||
+              transaction.status == 'PENDING')
+          ? Container(
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
                   ),
+                ],
+              ),
+              child: SafeArea(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 56.h,
+                  child: transaction.status == 'BORROWING'
+                      ? ElevatedButton(
+                          onPressed: () {
+                            context.push('/borrow-success', extra: {
+                              'borrowId': transaction.borrowId,
+                              'bookTitle': transaction.book?.title ?? '',
+                              'deadline': transaction.dueDate,
+                              'status': transaction.status,
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF8B9CEB),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28.r)),
+                          ),
+                          child: Text(
+                            'return_book'.tr(),
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14.sp),
+                          ),
+                        )
+                      : ElevatedButton(
+                          onPressed: () {
+                            context.push('/borrow-success', extra: {
+                              'borrowId': transaction.borrowId,
+                              'bookTitle': transaction.book?.title ?? '',
+                              'deadline': transaction.dueDate,
+                              'status': transaction.status,
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF8B9CEB),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28.r)),
+                          ),
+                          child: Text(
+                            'Show Detail QR',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14.sp),
+                          ),
+                        ),
                 ),
               ),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: SizedBox(
-                  height: 56.h,
-                  child: ElevatedButton(
-                    onPressed: () {}, // Handled by admin
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8B9CEB), // Soft Indigo
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
-                    ),
-                    child: Text(
-                      'return_book'.tr(),
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            )
+          : null,
     );
   }
 
