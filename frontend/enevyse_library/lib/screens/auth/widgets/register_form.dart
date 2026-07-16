@@ -89,23 +89,50 @@ class RegisterForm extends StatelessWidget {
                   },
                 ),
                 SizedBox(height: 28.h),
-                ElevatedButton(
-                  onPressed: (!logic.isFormValid || authProvider.isLoading)
-                      ? null
-                      : () => logic.handleRegister(context),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                  ),
-                  child: authProvider.isLoading
-                      ? SizedBox(
-                          width: 24.h,
-                          height: 24.h,
-                          child: const CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: (!logic.isFormValid || authProvider.isLoading)
+                        ? null
+                        : const LinearGradient(
+                            colors: [
+                              AppColors.headerGradientStart,
+                              AppColors.headerGradientEnd,
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
                           ),
-                        )
-                      : Text('register'.tr()),
+                    color: (!logic.isFormValid || authProvider.isLoading)
+                        ? Colors.grey.shade300
+                        : null,
+                    borderRadius: BorderRadius.circular(16.r),
+                  ),
+                  child: ElevatedButton(
+                    onPressed: (!logic.isFormValid || authProvider.isLoading)
+                        ? null
+                        : () => logic.handleRegister(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.transparent,
+                      disabledForegroundColor: Colors.grey.shade500,
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                    ),
+                    child: authProvider.isLoading
+                        ? SizedBox(
+                            width: 24.h,
+                            height: 24.h,
+                            child: const CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text('register'.tr()),
+                  ),
                 ),
                 SizedBox(height: 32.h),
                 Row(

@@ -101,7 +101,9 @@ class _ApproveBookScreenState extends State<ApproveBookScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                const SimpleBarcodeScannerPage(),
+                                const SimpleBarcodeScannerPage(
+                              scanType: ScanType.qr,
+                            ),
                           ));
                       if (res is String) {
                         _processBorrowId(res);

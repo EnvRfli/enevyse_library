@@ -21,7 +21,7 @@ class BookListScreen extends StatefulWidget {
 }
 
 class _BookListScreenState extends State<BookListScreen> {
-  bool _isGridView = false;
+  bool _isGridView = true;
 
   @override
   Widget build(BuildContext context) {

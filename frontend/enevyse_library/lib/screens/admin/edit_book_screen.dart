@@ -30,7 +30,7 @@ class _EditBookListView extends StatefulWidget {
 }
 
 class _EditBookListViewState extends State<_EditBookListView> {
-  bool _isGridView = false;
+  bool _isGridView = true;
 
   @override
   Widget build(BuildContext context) {

@@ -42,6 +42,7 @@ class RegisterLogic extends ChangeNotifier {
   }
 
   Future<void> handleRegister(BuildContext context) async {
+    FocusScope.of(context).unfocus();
     if (formKey.currentState?.validate() ?? false) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final success = await authProvider.register(
