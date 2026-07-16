@@ -138,7 +138,7 @@
   "add_book": "Tambah Buku",
   "edit_book": "Edit Buku",
   "delete_book": "Hapus Buku",
-  "approve_book": "Setujui Buku",
+  "approve_book": "Setujui Peminjaman / Pengembalian Buku",
   "manage_users": "Kelola Pengguna",
   "manage_books": "Kelola Buku",
   "support": "Bantuan",
@@ -190,5 +190,15 @@
   "phone": "Nomor Telepon",
   "address": "Alamat",
   "preferred_categories": "Kategori Pilihan",
-  "profile_updated_successfully": "Profil berhasil diperbarui"
+  "profile_updated_successfully": "Profil berhasil diperbarui",
+  "logout_confirm": "Apakah Anda yakin ingin keluar?",
+  "cancel": "Batal",
+  "pickup_main_library": "Perpustakaan Utama — Meja Depan",
+  "pickup_north_wing": "Sayap Utara — Loker",
+  "pickup_south_branch": "Cabang Selatan",
+  "return_deadline": "Batas Pengembalian",
+  "no_favorites": "Belum ada buku favorit",
+  "change_language": "Ubah Bahasa",
+  "change_language_confirm": "Apakah Anda yakin ingin mengubah bahasa aplikasi?",
+  "change": "Ubah"
 }
