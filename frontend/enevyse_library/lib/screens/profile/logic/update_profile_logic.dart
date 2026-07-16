@@ -35,7 +35,7 @@ class UpdateProfileLogic extends ChangeNotifier {
     memberIdController = TextEditingController(text: user?.memberId ?? '');
     phoneController = TextEditingController(text: user?.phone ?? '');
     addressController = TextEditingController(text: user?.address ?? '');
-    
+
     if (user != null && user.preferredCategories.isNotEmpty) {
       selectedCategories = List.from(user.preferredCategories);
     }

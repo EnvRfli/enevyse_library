@@ -140,8 +140,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                     .textTheme
                                     .headlineSmall
                                     ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
+                                      color: AppColors.textPrimary,
                                     ),
                                 textAlign: TextAlign.center,
                               ),

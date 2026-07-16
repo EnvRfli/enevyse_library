@@ -24,16 +24,17 @@ class _ExpandableSynopsisState extends State<ExpandableSynopsis> {
           'synopsis'.tr(),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: AppColors.textPrimary,
               ),
         ),
         SizedBox(height: 12.h),
-        InkWell(
+        GestureDetector(
           onTap: () {
             setState(() {
               _isExpanded = !_isExpanded;
             });
           },
+          behavior: HitTestBehavior.opaque,
           child: AnimatedSize(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,

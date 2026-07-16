@@ -95,7 +95,7 @@ class ReturnReminderCard extends StatelessWidget {
                     context.push('/borrow-detail/${transaction.id}');
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF262942), // Dark Navy
+                    backgroundColor: AppColors.primary, // Dark Navy
                     foregroundColor: Colors.white,
                     elevation: 0,
                     padding:

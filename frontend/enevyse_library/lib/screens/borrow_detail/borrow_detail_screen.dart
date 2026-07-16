@@ -59,225 +59,239 @@ class _BorrowDetailScreenState extends State<BorrowDetailScreen> {
 
     final dateFormat = DateFormat('MMM d, yyyy');
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          context.read<TransactionProvider>().fetchMyTransactions();
+        }
+      },
+      child: Scaffold(
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          'borrow_status'.tr(),
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 20.sp,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                color: AppColors.textPrimary),
+            onPressed: () => context.pop(),
+          ),
+          title: Text(
+            'borrow_status'.tr(),
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 20.sp,
+            ),
           ),
         ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 100.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Book Info Top
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 70.w,
-                    height: 100.h,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(12.r),
-                      image: transaction.book?.coverUrl != null &&
-                              transaction.book!.coverUrl!.isNotEmpty
-                          ? DecorationImage(
-                              image: NetworkImage(transaction.book!.coverUrl!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.only(
+                left: 24.w, right: 24.w, bottom: 100.h, top: 24.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Book Info Top
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 70.w,
+                      height: 100.h,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(12.r),
+                        image: transaction.book?.coverUrl != null &&
+                                transaction.book!.coverUrl!.isNotEmpty
+                            ? DecorationImage(
+                                image:
+                                    NetworkImage(transaction.book!.coverUrl!),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 16.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          transaction.book?.title ?? 'Unknown Book',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18.sp,
-                            color: AppColors.textPrimary,
+                    SizedBox(width: 16.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            transaction.book?.title ?? 'Unknown Book',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.sp,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          transaction.book?.author ?? 'Unknown Author',
-                          style: TextStyle(
-                              color: AppColors.textSecondary, fontSize: 14.sp),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          '${'borrow_id'.tr().toUpperCase()} · #${transaction.borrowId}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12.sp,
-                            color: const Color(0xFFB1B3C0),
-                            letterSpacing: 0.5,
+                          SizedBox(height: 4.h),
+                          Text(
+                            transaction.book?.author ?? 'Unknown Author',
+                            style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 14.sp),
                           ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            '${'borrow_id'.tr().toUpperCase()} · ${transaction.borrowId}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12.sp,
+                              color: const Color(0xFFB1B3C0),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 24.h),
+
+                // Info Grid
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  childAspectRatio: 2.2,
+                  crossAxisSpacing: 12.w,
+                  mainAxisSpacing: 12.h,
+                  children: [
+                    _buildInfoCard('borrow_date'.tr(),
+                        dateFormat.format(transaction.borrowDate)),
+                    _buildInfoCard(
+                        transaction.status.toUpperCase() == 'BORROWING'
+                            ? 'return_deadline'.tr()
+                            : 'pickup_deadline'.tr(),
+                        dateFormat.format(transaction.dueDate)),
+                    _buildInfoCard('pickup'.tr(), transaction.pickupLocation),
+                    _buildInfoCard(
+                      'status'.tr(),
+                      transaction.status.toUpperCase(),
+                      isStatus: true,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 32.h),
+
+                // QR Code Section
+                Text(
+                  'verification_qr'.tr(),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                ),
+                SizedBox(height: 16.h),
+                Center(
+                  child: Container(
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20.r),
+                      border: Border.all(color: AppColors.border),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 24.h),
-
-              // Info Grid
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                childAspectRatio: 2.2,
-                crossAxisSpacing: 12.w,
-                mainAxisSpacing: 12.h,
-                children: [
-                  _buildInfoCard('borrow_date'.tr(),
-                      dateFormat.format(transaction.borrowDate)),
-                  _buildInfoCard(
-                      'due_date'.tr(), dateFormat.format(transaction.dueDate)),
-                  _buildInfoCard('pickup'.tr(), transaction.pickupLocation),
-                  _buildInfoCard(
-                    'status'.tr(),
-                    transaction.status.toUpperCase(),
-                    isStatus: true,
-                  ),
-                ],
-              ),
-              SizedBox(height: 32.h),
-
-              // QR Code Section
-              Text(
-                'verification_qr'.tr(),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-              ),
-              SizedBox(height: 16.h),
-              Center(
-                child: Container(
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20.r),
-                    border: Border.all(color: AppColors.border),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
+                    child: QrImageView(
+                      data: transaction.borrowId,
+                      version: QrVersions.auto,
+                      size: 140.w,
+                      eyeStyle: const QrEyeStyle(
+                        eyeShape: QrEyeShape.square,
+                        color: AppColors.textPrimary,
                       ),
-                    ],
-                  ),
-                  child: QrImageView(
-                    data: transaction.borrowId,
-                    version: QrVersions.auto,
-                    size: 140.w,
-                    eyeStyle: const QrEyeStyle(
-                      eyeShape: QrEyeShape.square,
-                      color: AppColors.primary,
-                    ),
-                    dataModuleStyle: const QrDataModuleStyle(
-                      dataModuleShape: QrDataModuleShape.square,
-                      color: AppColors.primary,
+                      dataModuleStyle: const QrDataModuleStyle(
+                        dataModuleShape: QrDataModuleShape.square,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: 32.h),
+                SizedBox(height: 32.h),
 
-              // Timeline
-              BorrowStatusTimeline(transaction: transaction),
-            ],
+                // Timeline
+                BorrowStatusTimeline(transaction: transaction),
+              ],
+            ),
           ),
         ),
-      ),
-      bottomSheet: (transaction.status == 'BORROWING' ||
-              transaction.status == 'APPROVED' ||
-              transaction.status == 'PENDING')
-          ? Container(
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 56.h,
-                  child: transaction.status == 'BORROWING'
-                      ? ElevatedButton(
-                          onPressed: () {
-                            context.push('/borrow-success', extra: {
-                              'borrowId': transaction.borrowId,
-                              'bookTitle': transaction.book?.title ?? '',
-                              'deadline': transaction.dueDate,
-                              'status': transaction.status,
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF8B9CEB),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28.r)),
-                          ),
-                          child: Text(
-                            'return_book'.tr(),
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14.sp),
-                          ),
-                        )
-                      : ElevatedButton(
-                          onPressed: () {
-                            context.push('/borrow-success', extra: {
-                              'borrowId': transaction.borrowId,
-                              'bookTitle': transaction.book?.title ?? '',
-                              'deadline': transaction.dueDate,
-                              'status': transaction.status,
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF8B9CEB),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28.r)),
-                          ),
-                          child: Text(
-                            'Show Detail QR',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14.sp),
-                          ),
-                        ),
+        bottomSheet: (transaction.status == 'BORROWING' ||
+                transaction.status == 'APPROVED' ||
+                transaction.status == 'PENDING')
+            ? Container(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -5),
+                    ),
+                  ],
                 ),
-              ),
-            )
-          : null,
+                child: SafeArea(
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 56.h,
+                    child: transaction.status == 'BORROWING'
+                        ? ElevatedButton(
+                            onPressed: () {
+                              context.push('/borrow-success', extra: {
+                                'borrowId': transaction.borrowId,
+                                'bookTitle': transaction.book?.title ?? '',
+                                'deadline': transaction.dueDate,
+                                'status': transaction.status,
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF8B9CEB),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28.r)),
+                            ),
+                            child: Text(
+                              'return_book'.tr(),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14.sp),
+                            ),
+                          )
+                        : ElevatedButton(
+                            onPressed: () {
+                              context.push('/borrow-success', extra: {
+                                'borrowId': transaction.borrowId,
+                                'bookTitle': transaction.book?.title ?? '',
+                                'deadline': transaction.dueDate,
+                                'status': transaction.status,
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28.r)),
+                            ),
+                            child: Text(
+                              'Show Detail QR',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14.sp),
+                            ),
+                          ),
+                  ),
+                ),
+              )
+            : null,
+      ),
     );
   }
 
@@ -285,7 +299,7 @@ class _BorrowDetailScreenState extends State<BorrowDetailScreen> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFDFBF7),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: AppColors.border),
       ),
@@ -298,7 +312,7 @@ class _BorrowDetailScreenState extends State<BorrowDetailScreen> {
             style: TextStyle(
               fontSize: 10.sp,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFFB1B3C0),
+              color: AppColors.textSecondary,
               letterSpacing: 1.0,
             ),
           ),

@@ -16,7 +16,7 @@ class FavoriteBooksScreen extends StatefulWidget {
 }
 
 class _FavoriteBooksScreenState extends State<FavoriteBooksScreen> {
-  bool _isGridView = false;
+  bool _isGridView = true;
 
   @override
   void initState() {

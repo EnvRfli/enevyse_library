@@ -19,7 +19,7 @@ class BookInfoGrid extends StatelessWidget {
           'book_information'.tr(),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: AppColors.textPrimary,
               ),
         ),
         SizedBox(height: 16.h),
@@ -31,10 +31,14 @@ class BookInfoGrid extends StatelessWidget {
           crossAxisSpacing: 12.w,
           mainAxisSpacing: 12.h,
           children: [
-            buildInfoCard('category'.tr(), book.categories.isNotEmpty ? book.categories.first : '-'),
-            buildInfoCard('publisher'.tr(), book.publisher.isNotEmpty ? book.publisher : '-'),
-            buildInfoCard('published'.tr(), book.published != null ? book.published!.year.toString() : '-'),
-            buildInfoCard('language'.tr(), book.language.isNotEmpty ? book.language : '-'),
+            buildInfoCard('category'.tr(),
+                book.categories.isNotEmpty ? book.categories.first : '-'),
+            buildInfoCard('publisher'.tr(),
+                book.publisher.isNotEmpty ? book.publisher : '-'),
+            buildInfoCard('published'.tr(),
+                book.published != null ? book.published!.year.toString() : '-'),
+            buildInfoCard('language'.tr(),
+                book.language.isNotEmpty ? book.language : '-'),
             buildInfoCard('pages'.tr(), book.totalPages.toString()),
             buildInfoCard(
               'status'.tr(),

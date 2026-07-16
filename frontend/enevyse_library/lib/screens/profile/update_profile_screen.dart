@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -100,34 +101,42 @@ class _UpdateProfileView extends StatelessWidget {
                     ),
                     SizedBox(height: 32.h),
 
-                    // Disabled Fields
+                    // Name — editable
                     CustomTextField(
-                      controller: logic.nameController,
-                      hintText: 'name'.tr(),
-                      prefixIcon: Icons.person,
-                      readOnly: true,
-                    ),
+                        controller: logic.nameController,
+                        hintText: 'name'.tr(),
+                        prefixIcon: Icons.person,
+                        disabled: true),
                     SizedBox(height: 16.h),
+
+                    // Email — disabled
                     CustomTextField(
                       controller: logic.emailController,
                       hintText: 'email'.tr(),
                       prefixIcon: Icons.email,
-                      readOnly: true,
+                      disabled: true,
                     ),
                     SizedBox(height: 16.h),
+
+                    // Member ID — disabled
                     CustomTextField(
                       controller: logic.memberIdController,
                       hintText: 'Member ID',
                       prefixIcon: Icons.badge,
-                      readOnly: true,
+                      disabled: true,
                     ),
                     SizedBox(height: 16.h),
 
-                    // Editable Fields
+                    // Phone — digits only, max 13
                     CustomTextField(
                       controller: logic.phoneController,
                       hintText: 'Phone',
                       prefixIcon: Icons.phone,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(13),
+                      ],
                     ),
                     SizedBox(height: 16.h),
                     CustomTextField(

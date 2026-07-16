@@ -18,7 +18,7 @@ class ReviewsSection extends StatelessWidget {
               'reviews'.tr(),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: AppColors.textPrimary,
                   ),
             ),
             TextButton(
@@ -40,7 +40,8 @@ class ReviewsSection extends StatelessWidget {
           initial: 'R',
           avatarColor: const Color(0xFFF1E6FA), // Light purple
           rating: 5,
-          text: 'Genuinely changed how I plan my mornings. Short chapters, easy to pick up between classes.',
+          text:
+              'Genuinely changed how I plan my mornings. Short chapters, easy to pick up between classes.',
         ),
         Divider(color: AppColors.border, height: 32.h),
         _buildReviewItem(
@@ -48,7 +49,8 @@ class ReviewsSection extends StatelessWidget {
           initial: 'S',
           avatarColor: const Color(0xFFE0F4FA), // Light blue
           rating: 4,
-          text: 'Practical frameworks, though a little repetitive by the last few chapters.',
+          text:
+              'Practical frameworks, though a little repetitive by the last few chapters.',
         ),
       ],
     );
@@ -96,7 +98,8 @@ class ReviewsSection extends StatelessWidget {
                     5,
                     (index) => Icon(
                       Icons.star,
-                      color: index < rating ? Colors.amber : Colors.grey.shade300,
+                      color:
+                          index < rating ? Colors.amber : Colors.grey.shade300,
                       size: 12.w,
                     ),
                   ),

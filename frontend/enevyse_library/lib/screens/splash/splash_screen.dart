@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
+import '../../providers/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -32,9 +34,17 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    Future.delayed(const Duration(milliseconds: 2400), () {
+    Future.delayed(const Duration(milliseconds: 2400), () async {
       if (mounted) {
-        context.go('/login');
+        final authProvider = context.read<AuthProvider>();
+        await authProvider.checkAuth();
+        if (mounted) {
+          if (authProvider.currentUser != null) {
+            context.go('/home');
+          } else {
+            context.go('/login');
+          }
+        }
       }
     });
   }

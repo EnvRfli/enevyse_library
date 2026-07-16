@@ -83,4 +83,13 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
     return null;
   }
+
+  /// Clears all cached transaction data (called on logout)
+  void clearState() {
+    myTransactions = [];
+    isLoading = false;
+    errorMessage = null;
+    notifyListeners();
+  }
 }
+

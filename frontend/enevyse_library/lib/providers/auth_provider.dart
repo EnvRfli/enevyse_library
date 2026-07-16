@@ -5,7 +5,7 @@ import '../models/user_model.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository = AuthRepository();
-  
+
   bool _isLoading = false;
   String? _errorMessage;
   UserModel? _currentUser;
@@ -28,6 +28,9 @@ class AuthProvider extends ChangeNotifier {
     final isLoggedIn = await _authRepository.isLoggedIn();
     if (isLoggedIn) {
       _currentUser = await _authRepository.getMe();
+      if (_currentUser == null) {
+        await _authRepository.logout();
+      }
       notifyListeners();
     }
   }
@@ -61,7 +64,7 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> login(String email, String password) async {
     _setLoading(true);
     _errorMessage = null;
-    
+
     try {
       final success = await _authRepository.login(email, password);
       if (success) {
@@ -86,7 +89,6 @@ class AuthProvider extends ChangeNotifier {
     _currentUser = null;
     notifyListeners();
   }
-
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {
     _setLoading(true);

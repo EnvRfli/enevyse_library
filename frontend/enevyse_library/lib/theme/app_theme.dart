@@ -6,21 +6,66 @@ import 'app_colors.dart';
 class AppTheme {
   static ThemeData get lightTheme {
     final TextTheme textTheme = GoogleFonts.interTextTheme().copyWith(
-      displayLarge: GoogleFonts.inter(fontSize: 57.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-      displayMedium: GoogleFonts.inter(fontSize: 45.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-      displaySmall: GoogleFonts.inter(fontSize: 36.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-      headlineLarge: GoogleFonts.inter(fontSize: 32.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-      headlineMedium: GoogleFonts.inter(fontSize: 28.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-      headlineSmall: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-      titleLarge: GoogleFonts.inter(fontSize: 22.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-      titleMedium: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
-      titleSmall: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
-      bodyLarge: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.normal, color: AppColors.textPrimary),
-      bodyMedium: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.normal, color: AppColors.textSecondary),
-      bodySmall: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.normal, color: AppColors.textSecondary),
-      labelLarge: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-      labelMedium: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-      labelSmall: GoogleFonts.inter(fontSize: 11.sp, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+      displayLarge: GoogleFonts.inter(
+          fontSize: 57.sp,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary),
+      displayMedium: GoogleFonts.inter(
+          fontSize: 45.sp,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary),
+      displaySmall: GoogleFonts.inter(
+          fontSize: 36.sp,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary),
+      headlineLarge: GoogleFonts.inter(
+          fontSize: 32.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary),
+      headlineMedium: GoogleFonts.inter(
+          fontSize: 28.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary),
+      headlineSmall: GoogleFonts.inter(
+          fontSize: 24.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary),
+      titleLarge: GoogleFonts.inter(
+          fontSize: 22.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary),
+      titleMedium: GoogleFonts.inter(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimary),
+      titleSmall: GoogleFonts.inter(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimary),
+      bodyLarge: GoogleFonts.inter(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.normal,
+          color: AppColors.textPrimary),
+      bodyMedium: GoogleFonts.inter(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.normal,
+          color: AppColors.textSecondary),
+      bodySmall: GoogleFonts.inter(
+          fontSize: 12.sp,
+          fontWeight: FontWeight.normal,
+          color: AppColors.textSecondary),
+      labelLarge: GoogleFonts.inter(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary),
+      labelMedium: GoogleFonts.inter(
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textSecondary),
+      labelSmall: GoogleFonts.inter(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textSecondary),
     );
 
     return ThemeData(
@@ -42,6 +87,7 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.background,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
         titleTextStyle: GoogleFonts.inter(
@@ -114,6 +160,7 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         backgroundColor: const Color(0xFF121212),
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
         titleTextStyle: GoogleFonts.inter(

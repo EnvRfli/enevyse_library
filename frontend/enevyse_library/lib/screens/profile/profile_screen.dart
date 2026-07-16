@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../providers/auth_provider.dart';
+import '../../../providers/book_provider.dart';
+import '../../../providers/transaction_provider.dart';
 import '../../../theme/app_colors.dart';
 import 'widgets/profile_menu_item.dart';
 
@@ -22,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -166,11 +168,34 @@ class ProfileScreen extends StatelessWidget {
               trailingText: context.locale.languageCode == 'id'
                   ? 'Bahasa Indonesia'
                   : 'English',
-              onTap: () {
-                if (context.locale.languageCode == 'en') {
-                  context.setLocale(const Locale('id'));
-                } else {
-                  context.setLocale(const Locale('en'));
+              onTap: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text('change_language'.tr()),
+                    content: Text('change_language_confirm'.tr()),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: Text('cancel'.tr()),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: Text(
+                          'change'.tr(),
+                          style: const TextStyle(color: AppColors.primary),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm == true && context.mounted) {
+                  if (context.locale.languageCode == 'en') {
+                    context.setLocale(const Locale('id'));
+                  } else {
+                    context.setLocale(const Locale('en'));
+                  }
                 }
               },
             ),
@@ -184,8 +209,38 @@ class ProfileScreen extends StatelessWidget {
               title: 'logout'.tr(),
               isDestructive: true,
               onTap: () async {
-                final authProv = context.read<AuthProvider>();
-                await authProv.logout();
+                // Tampilkan konfirmasi sebelum logout
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text('logout'.tr()),
+                    content: Text('logout_confirm'.tr()),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: Text('cancel'.tr()),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: Text(
+                          'logout'.tr(),
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm != true) return;
+                if (!context.mounted) return;
+
+                // Bersihkan semua state provider
+                context.read<BookProvider>().clearState();
+                context.read<TransactionProvider>().clearState();
+
+                // Hapus session JWT
+                await context.read<AuthProvider>().logout();
+
                 if (context.mounted) {
                   context.go('/login');
                 }

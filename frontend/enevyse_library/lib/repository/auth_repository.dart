@@ -29,6 +29,8 @@ class AuthRepository {
           if (userName != null) {
             await _secureStorage.write(key: 'user_name', value: userName);
           }
+          await _secureStorage.write(key: 'last_email', value: email);
+          await _secureStorage.write(key: 'last_password', value: password);
           return true;
         }
       } else if (response.statusCode == 401) {
@@ -43,6 +45,14 @@ class AuthRepository {
       throw Exception('error_occurred');
     }
     return false;
+  }
+
+  Future<String?> getLastEmail() async {
+    return await _secureStorage.read(key: 'last_email');
+  }
+
+  Future<String?> getLastPassword() async {
+    return await _secureStorage.read(key: 'last_password');
   }
 
   Future<void> logout() async {
@@ -133,7 +143,8 @@ class AuthRepository {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final respStr = await response.stream.bytesToString();
         final data = jsonDecode(respStr);
-        return data['cover_url']; // Reusing the same response key name or 'profile_picture_url' depending on backend
+        return data[
+            'cover_url']; // Reusing the same response key name or 'profile_picture_url' depending on backend
       }
       return null;
     } catch (e) {
