@@ -16,19 +16,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// userUsecase adalah implementasi dari domain.UserUsecase.
 type userUsecase struct {
 	userRepo domain.UserRepository
 }
 
-// NewUserUsecase membuat instance baru dari userUsecase.
 func NewUserUsecase(repo domain.UserRepository) domain.UserUsecase {
 	return &userUsecase{userRepo: repo}
 }
 
-// Register menangani logika registrasi pengguna baru.
 func (u *userUsecase) Register(req *domain.RegisterRequest) (*domain.AuthResponse, error) {
-	// Cek apakah email sudah terdaftar
 	existing, err := u.userRepo.FindByEmail(req.Email)
 	if err != nil {
 		return nil, err
@@ -37,7 +33,6 @@ func (u *userUsecase) Register(req *domain.RegisterRequest) (*domain.AuthRespons
 		return nil, errors.New("email already registered")
 	}
 
-	// Hash password sebelum disimpan
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, errors.New("failed to hash password")

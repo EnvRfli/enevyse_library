@@ -17,16 +17,12 @@ type BookingRequestMessage struct {
 	Timestamp     time.Time `json:"timestamp"`
 }
 
-// PublishBookingRequest connects to RabbitMQ and publishes a booking request message.
 func PublishBookingRequest(bookID, transactionID uuid.UUID) error {
 	rabbitURL := os.Getenv("RABBITMQ_URL")
 	if rabbitURL == "" {
 		rabbitURL = "amqp://guest:guest@localhost:5672/"
 	}
 
-	// In a real application, you'd want to maintain a persistent connection
-	// rather than opening a new one for every message. For simplicity in this
-	// initial phase, we'll open and close per request.
 	conn, err := amqp.Dial(rabbitURL)
 	if err != nil {
 		log.Printf("Failed to connect to RabbitMQ: %v", err)

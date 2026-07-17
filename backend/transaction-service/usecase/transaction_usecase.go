@@ -19,7 +19,7 @@ func NewTransactionUsecase(repo domain.TransactionRepository) domain.Transaction
 }
 
 func (u *transactionUsecase) BorrowBook(userID uint, req *domain.BorrowRequest) (*domain.Transaction, error) {
-	// 1. Check Max 3 Books Limit
+	// Check Max 3 Books Limit
 	activeCount, err := u.txRepo.CountActiveTransactions(userID)
 	if err != nil {
 		return nil, errors.New("failed to check active transactions")
@@ -39,7 +39,6 @@ func (u *transactionUsecase) BorrowBook(userID uint, req *domain.BorrowRequest) 
 	borrowID := fmt.Sprintf("#LB-%s-%s", dateStr, sequence)
 
 	now := time.Now()
-	// Default business rules for dates
 	pickupDeadline := now.Add(2 * 24 * time.Hour) // 2 days from now
 	dueDate := now.Add(7 * 24 * time.Hour)        // 7 days from now
 
@@ -58,10 +57,8 @@ func (u *transactionUsecase) BorrowBook(userID uint, req *domain.BorrowRequest) 
 		return nil, errors.New("failed to create transaction")
 	}
 
-	// Publish message to RabbitMQ for Saga Pattern (e.g., to notify Book Service to check/reserve stock)
+	// Publish message to RabbitMQ
 	if err := messaging.PublishBookingRequest(tx.BookID, tx.ID); err != nil {
-		// Log the error but don't fail the transaction creation,
-		// or handle it with an outbox pattern in a production scenario.
 		fmt.Printf("Warning: Failed to publish booking request to RabbitMQ: %v\n", err)
 	}
 

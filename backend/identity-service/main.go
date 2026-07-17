@@ -2,8 +2,8 @@ package main
 
 import (
 	"identity-service/config"
-	"identity-service/domain"
 	deliveryHTTP "identity-service/delivery/http"
+	"identity-service/domain"
 	"identity-service/repository"
 	"identity-service/usecase"
 	"log"
@@ -31,6 +31,9 @@ func main() {
 	}
 	log.Println("✅ Database migration completed")
 
+	// Jalankan Seeder Admin
+	config.SeedAdmin(config.DB)
+
 	// Inisialisasi layer-layer aplikasi (Dependency Injection)
 	userRepo := repository.NewUserRepository(config.DB)
 	userUC := usecase.NewUserUsecase(userRepo)
@@ -44,7 +47,7 @@ func main() {
 	app.Use(logger.New())
 	app.Use(recover.New())
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*", // Untuk produksi, ganti "*" dengan URL Frontend (contoh: "http://localhost:3000")
+		AllowOrigins: "*",
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 		AllowMethods: "GET, POST, HEAD, PUT, DELETE, PATCH, OPTIONS",
 	}))
